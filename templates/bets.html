@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Bets History{% endblock %}
+
+{% block content %}
+<h1>Bets History</h1>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="">#</th>
+            <th style="">Status</th>
+            <th style="">Book</th>
+            <th style="">Sports</th>
+            <th style="">Event/Match</th>
+            <th style="">Pick</th>
+            <th style="">Amount</th>
+            <th style="">Line</th>
+            <th style="">Event Date</th>
+            <th style="">Capper</th>
+            <th style="">Profit</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for bet in bets %}
+        <tr {% if bet.status == 'Settled' and bet.result == 'Win' %}class="bg-win"{% endif %}
+            {% if bet.status == 'Settled' and bet.result == 'Loss' %}class="bg-loss"{% endif %}
+            {% if bet.status == 'Settled' and bet.result in ['Voided', 'Refunded', 'Push'] %}class="bg-void"{% endif %}
+            >
+            <td><a href="/bet/edit/{{ bet.bet_id }}">{{ loop.index }}</a></td>
+            <td>{{ bet.status }}</td>
+            <td>{{ bet.book }}</td>
+            <td>{{ bet.sport | default('', true) }}</td>
+            <td>{{ bet.match|truncate(40, True, '...') }}</td>
+            <td>{{ bet.pick|truncate(30, True, '...') }}</td>
+            <!-- Format amount to 2 decimals -->
+            <td>{{ "%.2f"|format(bet.stake_amount) }}$</td>
+            <!-- Ensure positive lines display + sign -->
+            <td>{{ bet.line if bet.line < 0 else '+' + bet.line|string }}</td>
+            <td>{{ bet.event_date[5:] }}</td>
+            <td>{{ bet.capper|default('', true)|truncate(12, True, '...') }}</td>
+
+            <td>
+                {% if bet.result == 'Win' %}
+                    +{{ "%.2f"|format(bet.potential_win_amount) }}$
+                {% elif bet.result == 'Loss' %}
+                    -{{ "%.2f"|format(bet.stake_amount) }}$
+                {% elif bet.result == 'Refunded' %}
+                    0.00$
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if num_pending is not none and total_stake_pending is not none and current_profit is not none %}
+<div class="stats-section">
+    <p><strong>Still in play:</strong> {{ num_pending }} bets for {{ "%.2f"|format(total_stake_pending) }}$</p>
+    <p><strong>Current profit from settled bets:</strong> {{ "%.2f"|format(current_profit) }}$</p>
+</div>
+{% endif %}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Capper ID</th>
+            <th>Total Bets</th>
+            <th>Settled Bets</th>
+            <th>Winning Bets</th>
+            <th>Losing Bets</th>
+            <th>Refunded Bets</th>
+            <th>Pending Bets</th>
+            <th>Profits</th>
+            <th>ROI</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for capper, results in cappers_stats.items() %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ capper }} {% if results.bet_count_error %}*{% endif %}</td>
+            <td>{{ results.bets }}</td>
+            <td>{{ results.settled_bets }}</td>
+            <td>{{ results.winning_bets }}</td>
+            <td>{{ results.losing_bets }}</td>
+            <td>{{ results.refunded_bets }}</td>
+            <td>{{ results.pending_bets }}</td>
+            <td>
+                {% if results.profits > 0 %}
+                    +{{ "{:.2f}".format(results.profits) }}$
+                {% elif results.profits < 0 %}
+                    {{ "{:.2f}".format(results.profits) }}$
+                {% else %}
+                    {{ "{:.2f}".format(results.profits) }}$
+                {% endif %}
+            </td>
+            <td>{{ "{:.2f}".format(results.roi) }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

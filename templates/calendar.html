@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendar{% endblock %}
+
+{% block content %}
+<h1>Profits for {{ month_str }} {{ year }}</h1>
+
+<div class="container">
+    <!-- Calendar headers: Sun, Mon, Tue, etc. -->
+    <div class="row">
+        <div class="col text-center fw-bold">Sun</div>
+        <div class="col text-center fw-bold">Mon</div>
+        <div class="col text-center fw-bold">Tue</div>
+        <div class="col text-center fw-bold">Wed</div>
+        <div class="col text-center fw-bold">Thu</div>
+        <div class="col text-center fw-bold">Fri</div>
+        <div class="col text-center fw-bold">Sat</div>
+    </div>
+
+    <!-- Padding for days before the first of the month -->
+    <div class="row">
+        {% set first_day_of_week = calendar.monthrange(year, month_int)[0] %}
+        {% for _ in range(first_day_of_week) %}
+        <div class="col border p-3"></div>
+        {% endfor %}
+
+        <!-- Loop through the days of the month -->
+        {% for day in range(1, calendar.monthrange(year, month_int)[1] + 1) %}
+            {% if (first_day_of_week + day - 1) % 7 == 0 and day != 1 %}
+            </div><div class="row">
+            {% endif %}
+            <div class="col border p-3 text-center"
+                 {% if daily_profits.get(day, 0) > 0 %}style="background-color: rgba(0, 255, 0, 0.3);"
+                 {% elif daily_profits.get(day, 0) < 0 %}style="background-color: rgba(255, 0, 0, 0.3);"
+                 {% endif %}>
+                <strong>{{ day }}</strong><br>
+                {% if day in daily_profits %}
+                    <p>Profit: {{ "%.2f"|format(daily_profits[day]) }}$</p>
+                {% else %}
+                    <p>No data</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <!-- Add empty cells after the last day of the month to fill the last row -->
+        {% set last_day_of_week = (first_day_of_week + calendar.monthrange(year, month_int)[1] - 1) % 7 %}
+        {% for _ in range(6 - last_day_of_week) %}
+        <div class="col border p-3"></div>
+        {% endfor %}
+    </div>
+</div>
+<div class="stats-section">
+    <p><strong>Total: </strong>{% if total_profits > 0 %}+{% endif %}{{ "%.2f"|format(total_profits) }}$</p>
+</div>
+{% endblock %}

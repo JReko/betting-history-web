@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Capper results{% endblock %}
+
+{% block content %}
+<h1>Capper results</h1>
+<p><i>Cappers are sorted by ROI, cappers with 10+ settled bet are sorted first in the list</i></p>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Capper ID</th>
+            <th>Total Bets</th>
+            <th>Settled Bets</th>
+            <th>Winning Bets</th>
+            <th>Losing Bets</th>
+            <th>Refunded Bets</th>
+            <th>Pending Bets</th>
+            <th>Profits</th>
+            <th>ROI</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for capper, results in cappers.items() %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ capper }} {% if results.bet_count_error %}*{% endif %}</td>
+            <td>{{ results.bets_count }}</td>
+            <td>{{ results.settled_bets_count }}</td>
+            <td>{{ results.winning_bets_count }}</td>
+            <td>{{ results.losing_bets_count }}</td>
+            <td>{{ results.refunded_bets_count }}</td>
+            <td>{{ results.pending_bets_count }}</td>
+            <td>
+                {% if results.profits > 0 %}
+                    +{{ "{:.2f}".format(results.profits) }}$
+                {% elif results.profits < 0 %}
+                    {{ "{:.2f}".format(results.profits) }}$
+                {% else %}
+                    {{ "{:.2f}".format(results.profits) }}$
+                {% endif %}
+            </td>
+            <td>{{ "{:.2f}".format(results.roi) }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
