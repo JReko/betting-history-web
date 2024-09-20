@@ -19,7 +19,7 @@ def get_user_timezone():
 
 
 # Function to convert a UTC date to the user's timezone
-def localize_to_user_timezone(utc_date_str, user_timezone):
+def localize_to_user_timezone(utc_date_str: str, user_timezone):
     # Parse the UTC date string (assuming format: 'YYYY-MM-DD HH:MM:SS')
     utc_date = datetime.strptime(utc_date_str, '%Y-%m-%d %H:%M:%S')
     # Set UTC timezone for the parsed date
@@ -63,15 +63,6 @@ def import_pinnacle_bets():
 
         flash('Bets imported successfully!', 'success')
         return redirect(url_for('todays_bets'))
-
-
-# @app.route("/bets")
-# def bets():
-#     # Fetch bets
-#     all_bets = Bet.query.order_by(asc(Bet.event_date)).all()
-#     # Fetch multi-bet win conditions
-#     conditions = MultiBetWinCondition.query.all()
-#     return render_template('bets.html', bets=all_bets, conditions=conditions, num_pending=None, total_stake_pending=None, current_profit=None)
 
 
 @app.route("/bets/today")
@@ -143,7 +134,7 @@ def fetch_bets_for_date(date):
     # Convert event_date to user's timezone and calculate profit
     current_profit = 0
     for bet in result_bets:
-        bet.event_date = localize_to_user_timezone(bet.event_date, user_timezone)
+        bet.event_date = UtilityTimeZone.convert_utc_datetime_to_user_time_zone(bet.event_date, user_timezone)
         if bet.status == "Settled" and bet.result == "Win":
             current_profit += bet.potential_win_amount
         elif bet.status == "Settled" and bet.result == "Loss":

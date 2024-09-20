@@ -73,3 +73,17 @@ class UtilityTimeZone:
         date_time_utc_start = date_time_tz_start.astimezone(UTC)
 
         return date_time_utc_start
+
+    @staticmethod
+    def convert_utc_datetime_to_user_time_zone(utc_date: datetime, user_timezone):
+        """
+        Function to convert a UTC date to the user's timezone
+        :param utc_date:
+        :param user_timezone:
+        :return:
+        """
+        # Set UTC timezone for the parsed date
+        utc_date = pytz.utc.localize(utc_date)
+        # Convert to user's timezone
+        local_date = utc_date.astimezone(user_timezone)
+        return local_date.strftime('%Y-%m-%d %H:%M')
