@@ -3,6 +3,7 @@ from datetime import datetime
 from app import db
 from app.models import Bet
 from app.utility_time_zone import UtilityTimeZone
+from flask_login import current_user
 
 
 class PinnacleBetPageScraper:
@@ -184,6 +185,7 @@ class PinnacleBetPageScraper:
                 pick=bet_data.get('pick'),
                 date_accepted=bet_data.get('date_accepted'),
                 event_date=bet_data.get('event_date'),
+                account_id=current_user.get_id(),
             )
             db.session.add(bet)
         else:
