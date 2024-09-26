@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 from datetime import datetime
 from app import db
@@ -109,7 +110,16 @@ class PinnacleBetPageScraper:
 
         # *** Pick
         inner_div_value = bet.find('div', class_="selection-f74c036e4b0c085e1f7a")
-        pick = inner_div_value.get_text().replace('(Sets) (Sets)', '(Sets)').replace('(Games) (Games)', '(Games)').strip()
+        pick = ""
+        if multi_bet:
+            for leg in multi_bet_win_conditions:
+                pick = pick + leg['pick'] + " + "
+            # Remove parentheses and the text inside them, but preserve the plus signs and spaces
+            pick = re.sub(r'\s*\(.*?\)', '', pick)
+            # Pick at this step should have a trailing " + "
+            pick = pick.rstrip(' + ')
+        else:
+            pick = inner_div_value.get_text().replace('(Sets) (Sets)', '(Sets)').replace('(Games) (Games)', '(Games)').strip()
 
         # *** Accepted and Settled dates
         inner_div_value = bet.find('div', class_="container-ff6d881f7592bf85eb4d inline-f3de3c46c55dfbeac4d8")
