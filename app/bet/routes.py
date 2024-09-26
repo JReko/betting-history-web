@@ -1,4 +1,6 @@
 from flask import render_template, request, redirect, url_for, abort, Blueprint, flash
+from flask_login import current_user
+
 from app import db
 from app.models import Bet
 from datetime import datetime
@@ -48,6 +50,7 @@ def bet_create():
             status=status,
             result=result,
             line=line,
+            account_id=current_user.get_id(),
         )
 
         # Save to the database

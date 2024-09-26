@@ -2,7 +2,9 @@ from datetime import datetime
 
 import pytz
 from flask_login import UserMixin
-from sqlalchemy import text, func
+from sqlalchemy import text, func, ForeignKey, Integer, Column
+from sqlalchemy.orm import relationship
+
 from app import db
 
 
@@ -23,6 +25,8 @@ class Bet(db.Model):
     date_accepted = db.Column(db.DateTime)
     event_date = db.Column(db.DateTime)
     book = db.Column(db.String(50))
+    account_id = Column(Integer, ForeignKey('accounts.id'), nullable=False)
+    account = relationship('Account', backref='bets')
 
     @staticmethod
     def get_distinct_cappers_for_day(start_of_day_utc, end_of_day_utc):
