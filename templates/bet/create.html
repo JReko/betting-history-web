@@ -6,6 +6,8 @@
 <div class="container mt-5">
     <h1>Enter Sports Bet</h1>
     <form action="/bet/create" method="post">
+        <!-- CSRF protection (if needed) -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="mb-3">
             <label for="book" class="form-label">Book</label>
             <select id="book" name="book" class="form-select" required>

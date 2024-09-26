@@ -5,7 +5,9 @@
 {% block content %}
 <div class="container mt-5">
     <h1>Assign Cappers to Bets</h1>
-    <form method="POST" action="/assign-cappers">
+    <form method="POST" action="/cappers/assign">
+        <!-- CSRF protection (if needed) -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <table class="table table-bordered">
             <thead>
                 <tr>

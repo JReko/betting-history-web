@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Bets History{% endblock %}
+{% block title %}BetTracker{% endblock %}
 
 {% block content %}
 <h1 class="text-center mb-4">Betting Dashboard</h1>
@@ -11,7 +11,7 @@
         <div class="row">
             <!-- Create a New Bet -->
             <div class="col-md-6 mb-4">
-                <a href="{{ url_for('bet_create') }}" class="card text-center">
+                <a href="{{ url_for('bet.bet_create') }}" class="card text-center">
                     <div class="card-body">
                         <div class="card-icon">
                             <i class="bi bi-pencil-square"></i>
@@ -20,74 +20,62 @@
                     </div>
                 </a>
             </div>
-
-            <!-- Daily Capper Report -->
-            <div class="col-md-6 mb-4">
-                <a href="{{ url_for('todays_bets') }}" class="card text-center">
-                    <div class="card-body">
-                        <div class="card-icon">
-                            <i class="bi bi-person-check"></i>
-                        </div>
-                        <h5 class="card-title">Daily Capper Report</h5>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Overall Capper Report -->
-            <div class="col-md-6 mb-4">
-                <a href="{{ url_for('cappers_read') }}" class="card text-center">
-                    <div class="card-body">
-                        <div class="card-icon">
-                            <i class="bi bi-award"></i>
-                        </div>
-                        <h5 class="card-title">Overall Capper Report</h5>
-                    </div>
-                </a>
-            </div>
         </div>
     </div>
-
     <!-- Right column: Imports -->
-<div class="col-md-4 right-column">
-    <h2 class="section-header">Import Bets</h2>
-    <div class="row gx-2 gy-2"> <!-- Reduced spacing classes for tighter gutters -->
-        <!-- Import Bets from Pinnacle -->
-        <div class="col-12 mb-2">
-            <a href="{{ url_for('import_pinnacle_bets') }}" class="card text-center d-flex align-items-center">
-                <div class="card-body d-flex align-items-center">
-                    <div class="card-icon me-3">
-                        <i class="bi bi-cloud-upload"></i>
+    <div class="col-md-4 right-column">
+        <h2 class="section-header">Import Bets</h2>
+        <div class="row gx-2 gy-2"> <!-- Reduced spacing classes for tighter gutters -->
+            <!-- Import Bets from Pinnacle -->
+            <div class="col-12 mb-2">
+                <a href="{{ url_for('default.import_pinnacle_bets') }}" class="card text-center d-flex align-items-center">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="card-icon me-3">
+                            <i class="bi bi-cloud-upload"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Pinny</h5>
                     </div>
-                    <h5 class="card-title mb-0">Pinny</h5>
-                </div>
-            </a>
-        </div>
-
-        <!-- Import Bets from Pinnacle automatically -->
-        <div class="col-12 mb-2">
-            <a href="{{ url_for('auto_import_pinnacle_bets') }}" class="card text-center d-flex align-items-center">
-                <div class="card-body d-flex align-items-center">
-                    <div class="card-icon me-3">
-                        <i class="bi bi-cloud-upload"></i>
+                </a>
+            </div>
+            <!-- Import Bets from Pinnacle automatically -->
+            <div class="col-12 mb-2">
+                <a href="{{ url_for('bet.auto_import_pinnacle_bets') }}" class="card text-center d-flex align-items-center">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="card-icon me-3">
+                            <i class="bi bi-cloud-upload"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Pinny-auto</h5>
                     </div>
-                    <h5 class="card-title mb-0">Pinny-auto</h5>
-                </div>
-            </a>
-        </div>
-
-        <!-- Import Bets from Bet99 -->
-        <div class="col-12 mb-2">
-            <a href="#" class="card text-center d-flex align-items-center">
-                <div class="card-body d-flex align-items-center">
-                    <div class="card-icon me-3">
-                        <i class="bi bi-cloud-upload"></i>
-                    </div>
-                    <h5 class="card-title mb-0">Bet99</h5>
-                </div>
-            </a>
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Readme Section: Explanation of features -->
+<div class="row mt-4">
+    <div class="col-12">
+        <h2 class="section-header">How to Use BetTracker</h2>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">1. Create a Bet</h5>
+                <p class="card-text">To create a new bet, click the "Create a New Bet" button in the top section. Fill in the required details like event date, stake, potential winnings, and the line, then submit to save the bet.</p>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">2. Edit a Bet</h5>
+                <p class="card-text">You can edit an existing bet by navigating to the Bets page. Find the bet you'd like to edit, click the edit button, and update any fields you need. Be sure to save your changes when you're done.</p>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">3. Assign Cappers</h5>
+                <p class="card-text">Each bet can be assigned to a capper, who provides betting tips. When entering a new bet, you'll have the option to enter the capper attached to the bet. There's also "Assign Cappers" feature to assign cappers in batch, this is mainly used when bets are imported an not created manually. Cappers help organize bets based on who made the pick and track how profitable they are.</p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

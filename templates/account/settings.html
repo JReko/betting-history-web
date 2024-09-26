@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Settings - Timezone{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Account Settings</h2>
+    <form method="POST" action="{{ url_for('account.settings') }}">
+
+        <!-- CSRF protection (if needed) -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+            <label for="timezone" class="form-label">Timezone</label>
+            <select name="timezone" id="timezone" class="form-select">
+                <!-- List of common timezones; dynamically selecting the current one -->
+                <option value="America/Montreal" {% if current_timezone == 'America/Montreal' %}selected{% endif %}>America/Montreal</option>
+                <option value="America/New_York" {% if current_timezone == 'America/New_York' %}selected{% endif %}>America/New York</option>
+                <option value="America/Los_Angeles" {% if current_timezone == 'America/Los_Angeles' %}selected{% endif %}>America/Los Angeles</option>
+                <option value="Europe/London" {% if current_timezone == 'Europe/London' %}selected{% endif %}>Europe/London</option>
+                <option value="Europe/Berlin" {% if current_timezone == 'Europe/Berlin' %}selected{% endif %}>Europe/Berlin</option>
+                <option value="Asia/Tokyo" {% if current_timezone == 'Asia/Tokyo' %}selected{% endif %}>Asia/Tokyo</option>
+                <option value="Australia/Sydney" {% if current_timezone == 'Australia/Sydney' %}selected{% endif %}>Australia/Sydney</option>
+                <!-- Add more timezones as necessary -->
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Timezone</button>
+    </form>
+</div>
+{% endblock %}

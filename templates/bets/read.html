@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Bets History{% endblock %}
+{% block title %}BetTracker: Bets{% endblock %}
 
 {% block content %}
-<h1>Bets History</h1>
-<table class="table table-bordered">
+<div class="container my-4">
+    <h1 class="display-4 text-center text-primary">{{ page_header }}</h1>
+</div>
+<table class="table table-bordered table-sm table-hover">
     <thead>
         <tr>
             <th style="">#</th>
@@ -53,12 +55,32 @@
     </tbody>
 </table>
 {% if num_pending is not none and total_stake_pending is not none and current_profit is not none %}
-<div class="stats-section">
-    <p><strong>Still in play:</strong> {{ num_pending }} bets for {{ "%.2f"|format(total_stake_pending) }}$</p>
-    <p><strong>Current profit from settled bets:</strong> {{ "%.2f"|format(current_profit) }}$</p>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-primary rounded">
+            <div class="card-body p-2 d-flex align-items-center">
+                <div>
+                    <h5 class="card-title text-primary">In Play</h5>
+                    <p><b>{{ num_pending }} bets for {{ "%.2f"|format(total_stake_pending) }}$</b></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm {% if current_profit < 0 %}border-danger{% elif current_profit > 0 %}border-success{% endif %} rounded">
+            <div class="card-body p-2 d-flex align-items-center">
+                <div>
+                    <h5 class="card-title {% if current_profit < 0 %}text-danger{% elif current_profit > 0 %}text-success{% endif %}">Current Profit</h5>
+                    <p class="{% if current_profit < 0 %}text-danger{% elif current_profit > 0 %}text-success{% endif %}">
+                        <b>{{ "%.2f"|format(current_profit) }}$</b>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endif %}
-<table class="table table-bordered table-hover">
+<table class="table table-bordered table-hover table-sm" style="margin-top: 20px;">
     <thead>
         <tr>
             <th>#</th>

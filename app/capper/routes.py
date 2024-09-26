@@ -1,15 +1,33 @@
-from datetime import datetime
+from flask import Blueprint, render_template, request, redirect, url_for, abort
+from app import db
+from app.models import Bet, Capper
 
-import pytz
-from flask import request, abort, render_template
-
-from app import app, db
-from app.capper import Capper
-from app.models import Bet
-from app.utility_time_zone import UtilityTimeZone
+capper_bp = Blueprint('capper', __name__)
 
 
-@app.route("/capper/<user_inputted_capper_id>", methods=["GET"])
+# Registration Route
+@capper_bp.route('/cappers/assign', methods=['GET', 'POST'])
+def assign_cappers():
+    if request.method == 'POST':
+        # Process the form submission to assign cappers
+        bet_ids = request.form.getlist('bet_id')
+        capper_names = request.form.getlist('capper')
+
+        for i, bet_id in enumerate(bet_ids):
+            # Find the bet by ID and update its capper
+            bet = Bet.query.get(bet_id)
+            if bet:
+                bet.capper = capper_names[i]
+                db.session.commit()
+
+        return redirect(url_for('bet.todays_bets'))
+
+    # Fetch bets without cappers
+    bets_without_capper = Bet.query.filter(Bet.capper.is_(None)).all()
+    return render_template('cappers/assign.html', bets=bets_without_capper)
+
+
+@capper_bp.route("/capper/<user_inputted_capper_id>", methods=["GET"])
 def capper_read(user_inputted_capper_id: str):
     if request.method == "GET":
         capper = Capper(user_inputted_capper_id)
@@ -48,7 +66,7 @@ def capper_read(user_inputted_capper_id: str):
         abort(404)
 
 
-@app.route("/cappers", methods=["GET"])
+@capper_bp.route("/cappers", methods=["GET"])
 def cappers_read():
     unique_cappers = db.session.query(Bet.capper).distinct().all()
     unique_cappers_list = [capper[0] for capper in unique_cappers]

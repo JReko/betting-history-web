@@ -6,6 +6,8 @@
 <div class="container mt-5">
     <h1>Enter Sports Bet</h1>
     <form action="/bet/edit/{{ bet.bet_id }}" method="post">
+        <!-- CSRF protection (if needed) -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="mb-3">
             <label for="bet_id" class="form-label">Bet ID</label>
             <input type="text" id="bet_id" name="bet_id" class="form-control" value="{{ bet.bet_id }}" required>

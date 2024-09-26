@@ -1,3 +1,7 @@
+from datetime import datetime
+
+import pytz
+
 from app.models import Bet
 from app.utility_time_zone import UtilityTimeZone
 
@@ -50,4 +54,49 @@ class Service:
             if capper_stats['total_stake'] > 0:
                 capper_stats['roi'] = (capper_stats['profits'] / capper_stats['total_stake']) * 100
 
-        return stats
+        # Sort the stats dictionary by 'profits' in descending order
+        sorted_stats = dict(sorted(stats.items(), key=lambda x: x[1]['profits'], reverse=True))
+
+        return sorted_stats
+
+    @staticmethod
+    def fetch_bets_for_date(date: datetime):
+        user_timezone = UtilityTimeZone.get_user_timezone()
+        # Localize the naive datetime (without time) to the user's timezone
+        start_local = user_timezone.localize(
+            datetime(year=date.year, month=date.month, day=date.day, hour=0, minute=0, second=0))
+        end_local = user_timezone.localize(
+            datetime(year=date.year, month=date.month, day=date.day, hour=23, minute=59, second=59))
+
+        # Convert the localized time to UTC
+        start_utc = start_local.astimezone(pytz.utc)
+        end_utc = end_local.astimezone(pytz.utc)
+
+        # Fetch bets by filtering event_date in UTC
+        result_bets = Bet.query.filter(Bet.event_date >= start_utc, Bet.event_date < end_utc).all()
+
+        # Convert event_date to user's timezone and calculate profit
+        current_profit = 0
+        for bet in result_bets:
+            bet.event_date = UtilityTimeZone.convert_utc_datetime_to_user_time_zone(bet.event_date, user_timezone)
+            if bet.status == "Settled" and bet.result == "Win":
+                current_profit += bet.potential_win_amount
+            elif bet.status == "Settled" and bet.result == "Loss":
+                current_profit -= bet.stake_amount
+
+        # Separate settled and pending/accepted bets
+        settled_bets = [bet for bet in result_bets if bet.status == 'Settled']
+        pending_bets = [bet for bet in result_bets if bet.status in ['Pending', 'Accepted']]
+
+        # Sort both groups by event date
+        settled_bets.sort(key=lambda settled_bet: settled_bet.event_date)
+        pending_bets.sort(key=lambda pending_bet: pending_bet.event_date)
+
+        # Combine settled bets at the top, pending/accepted bets at the bottom
+        sorted_bets = settled_bets + pending_bets
+
+        # Calculate statistics
+        num_pending = len(pending_bets)
+        total_stake_pending = sum(bet.stake_amount for bet in pending_bets)
+
+        return sorted_bets, num_pending, total_stake_pending, current_profit

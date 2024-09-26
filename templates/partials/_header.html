@@ -21,25 +21,26 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/assign-cappers">
+                    <a class="nav-link" href="/cappers">
+                        <i class="bi bi-person-check"></i> Cappers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cappers/assign">
                         <i class="bi bi-person-check"></i> Assign Cappers
                     </a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="statisticsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bar-chart"></i> Statistics
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="statisticsDropdown">
-                        <li><a class="dropdown-item" href="/statistics/cappers">Cappers</a></li>
-                        <li><a class="dropdown-item" href="/statistics/sports">Sports</a></li>
-                    </ul>
-                </li>
             </ul>
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/profile">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="account" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle"></i> My Account
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account"> <!-- Added dropdown-menu-end -->
+                        <li><a class="dropdown-item" href="/account/settings">Settings</a></li>
+                        <li><a class="dropdown-item" href="/account/edit">Edit My Account</a></li>
+                        <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
+                    </ul>
                 </li>
             </ul>
         </div>

@@ -1,11 +1,16 @@
-from flask import render_template, request, redirect, url_for, abort
-from app import app, db
+from flask import render_template, request, redirect, url_for, abort, Blueprint, flash
+from app import db
 from app.models import Bet
 from datetime import datetime
+
+from app.pinnacle_bet_page_scraper import PinnacleBetPageScraper
+from app.service import Service
 from app.utility_time_zone import UtilityTimeZone
 
+bet_bp = Blueprint('bet', __name__)
 
-@app.route("/bet/create", methods=["GET", "POST"])
+
+@bet_bp.route("/bet/create", methods=["GET", "POST"])
 def bet_create():
     if request.method == "POST":
         bet_id = "ID_PROBLEM"
@@ -49,12 +54,12 @@ def bet_create():
         db.session.add(bet)
         db.session.commit()
 
-        return redirect(url_for('todays_bets'))  # Redirect to the bets page
+        return redirect(url_for('bet.todays_bets'))  # Redirect to the bets page
 
     return render_template("/bet/create.html")
 
 
-@app.route("/bet/edit/<user_inputted_bet_id>", methods=["GET", "POST"])
+@bet_bp.route("/bet/edit/<user_inputted_bet_id>", methods=["GET", "POST"])
 def bet_edit(user_inputted_bet_id):
     if request.method == "POST":
         # Get form data
@@ -88,7 +93,7 @@ def bet_edit(user_inputted_bet_id):
 
         db.session.commit()
 
-        return redirect(url_for('todays_bets'))  # Redirect to the bets page
+        return redirect(url_for('bet.todays_bets'))  # Redirect to the bets page
 
     elif request.method == "GET":
 
@@ -99,3 +104,47 @@ def bet_edit(user_inputted_bet_id):
             abort(404)
 
         return render_template("/bet/edit.html", bet=bet)
+
+
+@bet_bp.route("/bet/auto_import_pinnacle_bets", methods=["GET", "POST"])
+def auto_import_pinnacle_bets():
+    if request.method == "GET":
+        # Call your import function to process the file
+        scraper = PinnacleBetPageScraper("/Users/franciscaisse/Downloads/p.htm")
+        for x in range(scraper.get_bet_count()):
+            scraper.import_bet()
+
+        flash('Bets imported successfully!', 'success')
+        return redirect(url_for('bet.todays_bets'))
+
+
+@bet_bp.route("/bets/today")
+def todays_bets():
+    # Get today's date
+    today = datetime.now(UtilityTimeZone.get_user_timezone())
+
+    today_str = today.strftime("%Y-%m-%d")
+    cappers_stats = Service.get_cappers_stats_for_a_date(today_str)
+
+    # Fetch and process the bets for today
+    sorted_bets, num_pending, total_stake_pending, current_profit = Service.fetch_bets_for_date(today)
+
+    # Pass data to the template
+    return render_template('bets/read.html', page_header="Today's bets", bets=sorted_bets, num_pending=num_pending, total_stake_pending=total_stake_pending, current_profit=current_profit, cappers_stats=cappers_stats)
+
+
+@bet_bp.route("/bets/<date>")
+def bets_by_date(date: str):
+    # Parse the provided date
+    try:
+        user_provided_date = datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        return "Invalid date format. Please use YYYY-MM-DD.", 400
+
+    cappers_stats = Service.get_cappers_stats_for_a_date(date)
+
+    # Fetch and process the bets for the given date
+    sorted_bets, num_pending, total_stake_pending, current_profit = Service.fetch_bets_for_date(user_provided_date)
+
+    # Pass data to the template
+    return render_template('bets/read.html', bets=sorted_bets, num_pending=num_pending, total_stake_pending=total_stake_pending, current_profit=current_profit, cappers_stats=cappers_stats)

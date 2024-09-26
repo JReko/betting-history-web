@@ -1,27 +1,79 @@
 {% extends 'base.html' %}
 
-{% block title %}Calendar{% endblock %}
+{% block title %}BetTracker: Calendar{% endblock %}
 
 {% block content %}
-<h1>Profits for {{ month_str }} {{ year }}</h1>
+<style>
+.card {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h2 strong {
+    font-size: 2.5rem;
+}
+
+.badge {
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.badge .bi {
+    font-size: 1.75rem;
+}
+</style>
+<!-- Two Cards Row -->
+<div class="container mb-4">
+    <div class="row">
+        <!-- Left Card: Month and Year -->
+        <div class="col-md-6">
+            <div class="card text-center p-4 shadow-sm bg-light rounded">
+                <h5 class="mb-2 text-uppercase text-muted" style="font-size: 1.1rem;">Month</h5>
+                <h3 class="mb-0" style="font-size: 1.75rem;">
+                    <strong>{{ month_str }} {{ year }}</strong>
+                </h3>
+            </div>
+        </div>
+
+        <!-- Right Card: Total Profits -->
+        <div class="col-md-6">
+            <div class="card text-center p-4 shadow-sm bg-light rounded">
+                <h5 class="mb-2 text-uppercase text-muted" style="font-size: 1.1rem;">Total Profits</h5>
+                <h3 class="mb-0" style="font-size: 1.75rem;">
+                    {% if total_profits > 0 %}
+                        <span class="text-success">+{{ "%.2f"|format(total_profits) }}$</span>
+                    {% elif total_profits < 0 %}
+                        <span class="text-danger">{{ "%.2f"|format(total_profits) }}$</span>
+                    {% else %}
+                        <span class="text-muted">{{ "%.2f"|format(total_profits) }}$</span>
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <!-- Calendar headers: Sun, Mon, Tue, etc. -->
-    <div class="row">
-        <div class="col text-center fw-bold">Sun</div>
-        <div class="col text-center fw-bold">Mon</div>
-        <div class="col text-center fw-bold">Tue</div>
-        <div class="col text-center fw-bold">Wed</div>
-        <div class="col text-center fw-bold">Thu</div>
-        <div class="col text-center fw-bold">Fri</div>
-        <div class="col text-center fw-bold">Sat</div>
+    <div class="row text-center bg-light border-bottom mb-2">
+        <div class="col fw-bold py-2">Sun</div>
+        <div class="col fw-bold py-2">Mon</div>
+        <div class="col fw-bold py-2">Tue</div>
+        <div class="col fw-bold py-2">Wed</div>
+        <div class="col fw-bold py-2">Thu</div>
+        <div class="col fw-bold py-2">Fri</div>
+        <div class="col fw-bold py-2">Sat</div>
     </div>
 
     <!-- Padding for days before the first of the month -->
     <div class="row">
         {% set first_day_of_week = calendar.monthrange(year, month_int)[0] %}
         {% for _ in range(first_day_of_week) %}
-        <div class="col border p-3"></div>
+        <div class="col border p-4"></div>
         {% endfor %}
 
         <!-- Loop through the days of the month -->
@@ -29,27 +81,39 @@
             {% if (first_day_of_week + day - 1) % 7 == 0 and day != 1 %}
             </div><div class="row">
             {% endif %}
-            <div class="col border p-3 text-center"
-                 {% if daily_profits.get(day, 0) > 0 %}style="background-color: rgba(0, 255, 0, 0.3);"
-                 {% elif daily_profits.get(day, 0) < 0 %}style="background-color: rgba(255, 0, 0, 0.3);"
+            <div class="col border p-4 text-center rounded shadow-sm position-relative"
+                 {% if daily_profits.get(day, 0) > 0 %}
+                    style="background: linear-gradient(to bottom, rgba(0, 255, 0, 0.2), rgba(0, 255, 0, 0.1));"
+                 {% elif daily_profits.get(day, 0) < 0 %}
+                    style="background: linear-gradient(to bottom, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.1));"
+                 {% else %}
+                    style="background-color: rgba(240, 240, 240, 0.8);"
                  {% endif %}>
-                <strong>{{ day }}</strong><br>
-                {% if day in daily_profits %}
-                    <p>Profit: {{ "%.2f"|format(daily_profits[day]) }}$</p>
-                {% else %}
-                    <p>No data</p>
-                {% endif %}
+                <!-- Link wrapping the day number -->
+                <a href="/bets/{{ year }}-{{ month_int }}-{{ day }}" class="stretched-link text-dark text-decoration-none">
+                    <strong class="fs-4">{{ day }}</strong>
+                    <br>
+                    <span class="small">
+                    {% if day in daily_profits %}
+                        {% if daily_profits[day] > 0 %}
+                            <i class="text-success bi bi-arrow-up"></i>
+                        {% elif daily_profits[day] < 0 %}
+                            <i class="text-danger bi bi-arrow-down"></i>
+                        {% endif %}
+                        {{ "%.2f"|format(daily_profits[day]) }}$
+                    {% else %}
+                        <p class="text-muted small">No data</p>
+                    {% endif %}
+                    </span>
+                </a>
             </div>
         {% endfor %}
 
         <!-- Add empty cells after the last day of the month to fill the last row -->
         {% set last_day_of_week = (first_day_of_week + calendar.monthrange(year, month_int)[1] - 1) % 7 %}
         {% for _ in range(6 - last_day_of_week) %}
-        <div class="col border p-3"></div>
+        <div class="col border p-4"></div>
         {% endfor %}
     </div>
-</div>
-<div class="stats-section">
-    <p><strong>Total: </strong>{% if total_profits > 0 %}+{% endif %}{{ "%.2f"|format(total_profits) }}$</p>
 </div>
 {% endblock %}
