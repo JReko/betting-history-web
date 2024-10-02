@@ -19,8 +19,14 @@ def create_app():
         template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../templates'),
         static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../static'),
     )
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL',
-                                                           'postgresql://local_user:strong_password@localhost:5432/betting_history_web')
+
+    # https://stackoverflow.com/questions/62688256/sqlalchemy-exc-nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectspostgre
+    # https://www.reddit.com/r/Heroku/comments/raje7k/cant_connect_sqlalchemy_to_heroku_despite/
+    database_uri = os.environ.get('DATABASE_URL', 'postgresql://local_user:strong_password@localhost:5432/betting_history_web')
+    if database_uri.startswith("postgres://"):
+        database_uri = database_uri.replace("postgres://", "postgresql://")
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'dev'
 

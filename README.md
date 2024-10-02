@@ -31,3 +31,9 @@ This application is designed to help you track your bets and analyze your bettin
 - **User profiles**: Create and manage user accounts with customizable time zones.
 - **Session management**: Secure login and session handling for each user.
 - **Power users**: Special access for power users to manage accounts and edit data.
+
+### 7. **How I setup heroku**
+- heroku create betting-history-web
+- heroku addons:create heroku-postgresql:essential-0
+- DATABASE_URL is automatically populated in the heroku environment
+- heroku config:get DATABASE_URL if you want to actually see it from your own eyes
