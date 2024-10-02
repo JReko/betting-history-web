@@ -34,7 +34,7 @@ def login():
 
         account = Account.query.filter_by(email=email).first()
 
-        if not account.confirmed:
+        if account and not account.confirmed:
             abort(401, "Your account has not been confirmed by the administrator.")
 
         if account and check_password_hash(account.password_hash, password):
@@ -43,7 +43,7 @@ def login():
             flash('Login successful!', 'success')
             return redirect(url_for('default.index'))
 
-        flash('Invalid credentials. Please try again.')
+        flash('Invalid credentials. Please try again.', 'warning')
         return redirect(url_for('auth.login'))
 
     return render_template('/auth/login.html')
