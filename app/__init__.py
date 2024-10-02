@@ -19,8 +19,8 @@ def create_app():
         template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../templates'),
         static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../static'),
     )
-
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://local_user:strong_password@localhost:5432/betting_history_web'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL',
+                                                           'postgresql://local_user:strong_password@localhost:5432/betting_history_web')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'dev'
 
