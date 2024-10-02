@@ -1,113 +1,15 @@
 from datetime import datetime
-
 import pytz
-from flask_login import UserMixin
-from sqlalchemy import text, func, ForeignKey, Integer, Column
-from sqlalchemy.orm import relationship
+from flask_login import current_user
+from sqlalchemy import func
 
-from app import db
-
-
-class Bet(db.Model):
-    __tablename__ = 'bets'
-
-    bet_id = db.Column(db.String(50), primary_key=True)
-    sport = db.Column(db.String(50))
-    status = db.Column(db.String(50))
-    result = db.Column(db.String(50))
-    capper = db.Column(db.String(50))
-    stake_amount = db.Column(db.Float)  # DOUBLE PRECISION in PostgreSQL
-    potential_win_amount = db.Column(db.Float)  # DOUBLE PRECISION in PostgreSQL
-    line = db.Column(db.Integer)
-    multi_bet = db.Column(db.Boolean)
-    match = db.Column(db.String(255))
-    pick = db.Column(db.String(255))
-    date_accepted = db.Column(db.DateTime)
-    event_date = db.Column(db.DateTime)
-    book = db.Column(db.String(50))
-    account_id = Column(Integer, ForeignKey('accounts.id'), nullable=False)
-    account = relationship('Account', backref='bets')
-
-    @staticmethod
-    def get_distinct_cappers_for_day(start_of_day_utc, end_of_day_utc):
-        # Get distinct cappers and bets for the day
-        cappers_query = text('''
-                SELECT DISTINCT capper
-                FROM bets
-                WHERE event_date >= :start AND event_date < :end AND capper IS NOT NULL
-            ''')
-        cappers = db.session.execute(cappers_query, {'start': start_of_day_utc, 'end': end_of_day_utc}).mappings().fetchall()
-
-        return cappers
-
-    @staticmethod
-    def get_bets_for_cappers_on_day(start_of_day_utc, end_of_day_utc):
-        query = text('''
-            SELECT * 
-            FROM bets
-            WHERE event_date >= :start AND event_date < :end 
-            AND capper IN (SELECT DISTINCT capper FROM bets WHERE event_date >= :start AND event_date < :end)
-        ''')
-        bets = db.session.execute(query, {'start': start_of_day_utc, 'end': end_of_day_utc}).mappings().fetchall()
-        return bets
-
-    @staticmethod
-    def get_next_bet365_id():
-        query = text("""
-            SELECT MAX(CAST(SUBSTRING(bet_id FROM LENGTH('bet365_') + 1) AS INTEGER)) AS max_id
-            FROM bets
-            WHERE bet_id LIKE 'bet365_%';
-        """)
-        result = db.session.execute(query).fetchone()
-
-        max_id = result[0] if result[0] is not None else 0  # Handle case where no IDs exist
-        next_id = max_id + 1
-
-        return f"bet365_{next_id}"
-
-    @staticmethod
-    def get_next_bet99_id():
-        query = text("""
-            SELECT MAX(CAST(SUBSTRING(bet_id FROM LENGTH('bet99_') + 1) AS INTEGER)) AS max_id
-            FROM bets
-            WHERE bet_id LIKE 'bet99_%';
-        """)
-        result = db.session.execute(query).fetchone()
-
-        max_id = result[0] if result[0] is not None else 0  # Handle case where no IDs exist
-        next_id = max_id + 1
-
-        return f"bet99_{next_id}"
-
-
-class Account(UserMixin, db.Model):
-    __tablename__ = 'accounts'
-
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    timezone = db.Column(db.String(50))
-    confirmed = db.Column(db.Boolean, default=False)
-    power_user = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-    updated_at = db.Column(db.DateTime, server_default=db.func.now())
-
-    def __init__(self, email: str, password_hash: str):
-        self.email = email
-        self.password_hash = password_hash
-
-    @property
-    def is_active(self):
-        """Return True if the user has confirmed their account."""
-        return self.confirmed
-
-    def get_id(self):
-        return f"{str(self.id)}"
+from app.bet_model import Bet
 
 
 class Capper:
     def __init__(self, capper_id: str):
-        bets = Bet.query.filter(func.lower(Bet.capper) == capper_id.lower()).all()
+        account_id = current_user.get_id()
+        bets = Bet.query.filter(func.lower(Bet.capper) == capper_id.lower(), Bet.account_id == account_id).all()
         self.bets = sorted(bets, key=lambda bet: bet.event_date)
         self.settled_bets = self._get_settled_bets()
         self.winning_bets = self._get_winning_bets()

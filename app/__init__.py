@@ -38,24 +38,37 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        from app.models import Account
+        from app.account_model import Account
         return Account.query.get(int(user_id))
 
     # Import and register blueprints after initializing the app
+    from app.default.routes import default_bp
+    app.register_blueprint(default_bp)
+
     from app.auth.routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
     from app.account.routes import account_bp
     app.register_blueprint(account_bp, url_prefix='/account')
 
-    from app.routes.default import default_bp
-    app.register_blueprint(default_bp)
-
     from app.bet.routes import bet_bp
     app.register_blueprint(bet_bp)
 
     from app.capper.routes import capper_bp
     app.register_blueprint(capper_bp)
+
+    from app.calendar.routes import calendar_bp
+    app.register_blueprint(calendar_bp)
+
+    from app.imports.routes import import_bp
+    app.register_blueprint(import_bp)
+
+    @app.context_processor
+    def inject_user():
+        # Check if the user is authenticated before trying to access the email
+        if current_user.is_authenticated:
+            return {'email': current_user.email}
+        return {}
 
     # This function enforces that all routes, except those explicitly listed, require the user to be logged in.
     # It runs before every request, checking the user's authentication status and ensuring they are logged in.

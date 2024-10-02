@@ -2,7 +2,7 @@ import re
 from bs4 import BeautifulSoup
 from datetime import datetime
 from app import db
-from app.models import Bet
+from app.bet_model import Bet
 from app.utility_time_zone import UtilityTimeZone
 from flask_login import current_user
 
@@ -221,6 +221,3 @@ class PinnacleBetPageScraper:
         # Query the Bet table by bet_id
         bet = Bet.query.filter_by(bet_id=bet_id).first()
         return bet
-
-
-

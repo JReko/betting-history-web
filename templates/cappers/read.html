@@ -24,7 +24,7 @@
         {% for capper, results in cappers.items() %}
         <tr>
             <td>{{ loop.index }}</td>
-            <td>{{ capper }} {% if results.bet_count_error %}*{% endif %}</td>
+            <td><a href="/capper/{{ capper }}">{{ capper }} {% if results.bet_count_error %}*{% endif %}</a></td>
             <td>{{ results.bets_count }}</td>
             <td>{{ results.settled_bets_count }}</td>
             <td>{{ results.winning_bets_count }}</td>

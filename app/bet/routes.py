@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, abort, Blueprint,
 from flask_login import current_user
 
 from app import db
-from app.models import Bet
+from app.bet_model import Bet
 from datetime import datetime
 
 from app.pinnacle_bet_page_scraper import PinnacleBetPageScraper
@@ -24,7 +24,6 @@ def bet_create():
         capper = request.form.get("capper")
         amount = float(request.form.get("amount"))
         potential_win_amount = float(request.form.get("potential_win_amount"))
-        creation_date = request.form.get("creation_date")
         event_date_string = request.form.get("event_date")
         event_date = datetime.strptime(event_date_string, '%Y-%m-%dT%H:%M')
         event_date_utc_string = UtilityTimeZone.convert_to_utc(event_date.strftime('%Y-%m-%d %H:%M:%S'))
@@ -107,18 +106,6 @@ def bet_edit(user_inputted_bet_id):
             abort(404)
 
         return render_template("/bet/edit.html", bet=bet)
-
-
-@bet_bp.route("/bet/auto_import_pinnacle_bets", methods=["GET", "POST"])
-def auto_import_pinnacle_bets():
-    if request.method == "GET":
-        # Call your import function to process the file
-        scraper = PinnacleBetPageScraper("/Users/franciscaisse/Downloads/p.htm")
-        for x in range(scraper.get_bet_count()):
-            scraper.import_bet()
-
-        flash('Bets imported successfully!', 'success')
-        return redirect(url_for('bet.todays_bets'))
 
 
 @bet_bp.route("/bets/today")

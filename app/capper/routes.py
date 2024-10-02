@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort
+from flask_login import current_user
+
 from app import db
-from app.models import Bet, Capper
+from app.bet_model import Bet
+from app.capper_model import Capper
 
 capper_bp = Blueprint('capper', __name__)
 
@@ -68,7 +71,8 @@ def capper_read(user_inputted_capper_id: str):
 
 @capper_bp.route("/cappers", methods=["GET"])
 def cappers_read():
-    unique_cappers = db.session.query(Bet.capper).distinct().all()
+    account_id = current_user.get_id()
+    unique_cappers = db.session.query(Bet.capper).filter(Bet.account_id == account_id).distinct().all()
     unique_cappers_list = [capper[0] for capper in unique_cappers]
     cappers_output = {}
     for capper_id in unique_cappers_list:

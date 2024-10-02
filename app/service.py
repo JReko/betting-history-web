@@ -1,8 +1,7 @@
 from datetime import datetime
-
 import pytz
-
-from app.models import Bet
+from flask_login import current_user
+from app.bet_model import Bet
 from app.utility_time_zone import UtilityTimeZone
 
 
@@ -16,7 +15,7 @@ class Service:
         stats = {}
 
         capper_rows = Bet.get_distinct_cappers_for_day(utc_start, utc_end)
-        bets = Bet.get_bets_for_cappers_on_day(utc_start, utc_end)
+        bets = Bet.get_bets_for_day(utc_start, utc_end)
 
         for row in capper_rows:
             stats[row['capper']] = {
@@ -73,7 +72,7 @@ class Service:
         end_utc = end_local.astimezone(pytz.utc)
 
         # Fetch bets by filtering event_date in UTC
-        result_bets = Bet.query.filter(Bet.event_date >= start_utc, Bet.event_date < end_utc).all()
+        result_bets = Bet.query.filter(Bet.event_date >= start_utc, Bet.event_date < end_utc, Bet.account_id == current_user.get_id()).all()
 
         # Convert event_date to user's timezone and calculate profit
         current_profit = 0

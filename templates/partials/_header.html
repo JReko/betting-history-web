@@ -34,7 +34,7 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="account" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle"></i> My Account
+                        <i class="bi bi-person-circle"></i>  {{ email if email else 'My Account' }}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account"> <!-- Added dropdown-menu-end -->
                         <li><a class="dropdown-item" href="/account/settings">Settings</a></li>
