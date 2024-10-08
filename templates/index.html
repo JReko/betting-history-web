@@ -23,8 +23,10 @@
         </div>
     </div>
     <!-- Right column: Imports -->
+
     <div class="col-md-4 right-column">
         <h2 class="section-header">Import Bets</h2>
+        {% if admin %}
         <div class="row gx-2 gy-2"> <!-- Reduced spacing classes for tighter gutters -->
             <!-- Import Bets from Pinnacle -->
             <div class="col-12 mb-2">
@@ -49,6 +51,9 @@
                 </a>
             </div>
         </div>
+        {% else %}
+        <p> Still to come ...</p>
+        {% endif %}
     </div>
 </div>
 

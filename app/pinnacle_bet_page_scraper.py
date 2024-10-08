@@ -61,6 +61,25 @@ class PinnacleBetPageScraper:
         if i:
             sport = i['class'][0].replace('icon-', '')
 
+        # league
+        div = bet.find('div', class_='descLabel-cff62e4d8b43253a2856 marketLeague-ae76eaa0da8b52c27a31')
+        if div:
+            text = div.get_text()
+            if sport == "hockey" and "NHL" in text.upper():
+                sport = f"{sport} - NHL"
+            elif sport == "tennis" and "ATP" in text.upper():
+                sport = f"{sport} - ATP"
+            elif sport == "tennis" and "WTA" in text.upper():
+                sport = f"{sport} - WTA"
+            elif sport == "baseball" and "MLB" in text.upper():
+                sport = f"{sport} - MLB"
+            elif sport == "baseball" and "KOREA" in text.upper():
+                sport = f"{sport} - KBO"
+            elif sport == "football" and "NFL" in text.upper():
+                sport = f"{sport} - NFL"
+            elif sport == "football" and "NCAA" in text.upper():
+                sport = f"{sport} - NCAA"
+
         # *** Stake & potential win amounts
         divs = bet.find_all('div', class_="flex-d3c12ab93880fc84f91a")
         spans = divs[1].find_all('span')
@@ -140,6 +159,7 @@ class PinnacleBetPageScraper:
         date_accepted_string = date_accepted.strftime("%Y-%m-%d %H:%M:%S")
         if date_settled_string:
             date_settled = datetime.strptime(date_settled_string, "%b %d, %Y, %I:%M %p")
+            date_settled = date_settled.replace(second=0)
             date_settled_string = date_settled.strftime("%Y-%m-%d %H:%M:%S")
         else:
             date_settled_string = None
@@ -149,6 +169,7 @@ class PinnacleBetPageScraper:
                 event_date_string = date_settled_string
             else:
                 event_date = datetime.now()
+                event_date = event_date.replace(second=0)
                 event_date_string = event_date.strftime("%Y-%m-%d %H:%M:%S")
 
         event_date_string = UtilityTimeZone.convert_to_utc(event_date_string)

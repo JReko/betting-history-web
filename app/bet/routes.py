@@ -3,7 +3,7 @@ from flask_login import current_user
 
 from app import db
 from app.bet_model import Bet
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app.pinnacle_bet_page_scraper import PinnacleBetPageScraper
 from app.service import Service
@@ -100,6 +100,7 @@ def bet_edit(user_inputted_bet_id):
     elif request.method == "GET":
 
         bet = Bet.query.get(user_inputted_bet_id)
+        bet.event_date = UtilityTimeZone.convert_utc_datetime_to_user_time_zone(bet.event_date)
 
         # If no bet is found, return a 404 error
         if not bet:
@@ -112,22 +113,18 @@ def bet_edit(user_inputted_bet_id):
 def todays_bets():
     # Get today's date
     today = datetime.now(UtilityTimeZone.get_user_timezone())
-
     today_str = today.strftime("%Y-%m-%d")
-    cappers_stats = Service.get_cappers_stats_for_a_date(today_str)
 
-    # Fetch and process the bets for today
-    sorted_bets, num_pending, total_stake_pending, current_profit = Service.fetch_bets_for_date(today)
-
-    # Pass data to the template
-    return render_template('bets/read.html', page_header="Today's bets", bets=sorted_bets, num_pending=num_pending, total_stake_pending=total_stake_pending, current_profit=current_profit, cappers_stats=cappers_stats)
+    return redirect(url_for('bet.bets_by_date', date=today_str))
 
 
 @bet_bp.route("/bets/<date>")
 def bets_by_date(date: str):
-    # Parse the provided date
+    # Validate the format and prepare links
     try:
         user_provided_date = datetime.strptime(date, "%Y-%m-%d")
+        previous_day = (user_provided_date - timedelta(days=1)).strftime("%Y-%m-%d")
+        next_day = (user_provided_date + timedelta(days=1)).strftime("%Y-%m-%d")
     except ValueError:
         return "Invalid date format. Please use YYYY-MM-DD.", 400
 
@@ -137,4 +134,14 @@ def bets_by_date(date: str):
     sorted_bets, num_pending, total_stake_pending, current_profit = Service.fetch_bets_for_date(user_provided_date)
 
     # Pass data to the template
-    return render_template('bets/read.html', bets=sorted_bets, num_pending=num_pending, total_stake_pending=total_stake_pending, current_profit=current_profit, cappers_stats=cappers_stats)
+    return render_template(
+        'bets/read.html',
+        date=date,
+        previous_day=previous_day,
+        next_day=next_day,
+        bets=sorted_bets,
+        num_pending=num_pending,
+        total_stake_pending=total_stake_pending,
+        current_profit=current_profit,
+        cappers_stats=cappers_stats
+    )

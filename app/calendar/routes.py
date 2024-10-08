@@ -60,4 +60,4 @@ def calendar_today():
     today = datetime.now(local_tz)
 
     # Redirect to the /calendar/<int:year>/<int:month> route
-    return redirect(url_for('default.calendar_view', year=today.year, month=today.month))
+    return redirect(url_for('calendar.calendar_view', year=today.year, month=today.month))

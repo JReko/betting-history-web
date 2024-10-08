@@ -33,9 +33,9 @@ h2 strong {
         <div class="col-md-6">
             <div class="card text-center p-4 shadow-sm bg-light rounded">
                 <h5 class="mb-2 text-uppercase text-muted" style="font-size: 1.1rem;">Month</h5>
-                <h3 class="mb-0" style="font-size: 1.75rem;">
+                <h4 class="mb-0">
                     <strong>{{ month_str }} {{ year }}</strong>
-                </h3>
+                </h4>
             </div>
         </div>
 
@@ -43,7 +43,7 @@ h2 strong {
         <div class="col-md-6">
             <div class="card text-center p-4 shadow-sm bg-light rounded">
                 <h5 class="mb-2 text-uppercase text-muted" style="font-size: 1.1rem;">Total Profits</h5>
-                <h3 class="mb-0" style="font-size: 1.75rem;">
+                <h4 class="mb-0">
                     {% if total_profits > 0 %}
                         <span class="text-success">+{{ "%.2f"|format(total_profits) }}$</span>
                     {% elif total_profits < 0 %}
@@ -51,7 +51,7 @@ h2 strong {
                     {% else %}
                         <span class="text-muted">{{ "%.2f"|format(total_profits) }}$</span>
                     {% endif %}
-                </h3>
+                </h4>
             </div>
         </div>
     </div>

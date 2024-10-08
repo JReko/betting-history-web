@@ -12,6 +12,8 @@
 
         <!-- File upload form -->
         <form action="/import_pinnacle_bets" method="POST" enctype="multipart/form-data">
+            <!-- CSRF protection (if needed) -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
                 <label for="betFile" class="form-label">Select Pinnacle Bets File</label>
                 <input class="form-control" type="file" id="betFile" name="betFile" accept=".htm" required>

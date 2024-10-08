@@ -25,11 +25,6 @@ class UtilityTimeZone:
         # You can replace this with logic to get timezone from session/cookie
         return pytz.timezone('America/Montreal')
 
-    from datetime import datetime
-    import pytz  # or use zoneinfo for Python 3.9+
-    USER_TIMEZONE = pytz.timezone('America/Montreal')  # adjust based on the timezone you're using
-    UTC = pytz.utc
-
     @staticmethod
     def get_day_start_datetime_tz(date: str) -> datetime:
         expected_format = "%Y-%m-%d"
@@ -75,7 +70,7 @@ class UtilityTimeZone:
         return date_time_utc_start
 
     @staticmethod
-    def convert_utc_datetime_to_user_time_zone(utc_date: datetime, user_timezone):
+    def convert_utc_datetime_to_user_time_zone(utc_date: datetime):
         """
         Function to convert a UTC date to the user's timezone
         :param utc_date:
@@ -85,5 +80,5 @@ class UtilityTimeZone:
         # Set UTC timezone for the parsed date
         utc_date = pytz.utc.localize(utc_date)
         # Convert to user's timezone
-        local_date = utc_date.astimezone(user_timezone)
+        local_date = utc_date.astimezone(USER_TIMEZONE)
         return local_date.strftime('%Y-%m-%d %H:%M')

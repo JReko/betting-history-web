@@ -13,6 +13,8 @@
             <select id="book" name="book" class="form-select" required>
                 <option value="Bet365">Bet365</option>
                 <option value="Bet99">Bet99</option>
+                <option value="Pinnacle">Pinnacle</option>
+                <option value="Other">Pinnacle</option>
             </select>
         </div>
         <div class="mb-3">
@@ -37,8 +39,18 @@
             <input type="datetime-local" id="event_date" name="event_date" class="form-control" required>
         </div>
         <div class="mb-3">
-            <label for="event_match" class="form-label">sport</label>
-            <input type="text" id="sport" name="sport" class="form-control" required>
+            <label for="sport" class="form-label">Sport/League</label>
+            <select id="sport" name="sport" class="form-select" required>
+                <option value="Hockey - NHL">Hockey - NHL</option>
+                <option value="Football - NFL">Football - NF</option>
+                <option value="Football - NCAA">Pinnacle</option>
+                <option value="Baseball - MLB">Pinnacle</option>
+                <option value="Baseball - KBO">Pinnacle</option>
+                <option value="Tennis - ATP">Pinnacle</option>
+                <option value="Tennis - WTA">Pinnacle</option>
+                <option value="MMA - UFC">Pinnacle</option>
+                <option value="Soccer">Pinnacle</option>
+            </select>
         </div>
         <div class="mb-3">
             <label for="event_match" class="form-label">Event/Match</label>

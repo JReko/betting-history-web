@@ -73,7 +73,8 @@ def create_app():
     def inject_user():
         # Check if the user is authenticated before trying to access the email
         if current_user.is_authenticated:
-            return {'email': current_user.email}
+            admin = True if current_user.email == "francis.caisse@gmail.com" else False
+            return {'email': current_user.email, 'admin': admin}
         return {}
 
     # This function enforces that all routes, except those explicitly listed, require the user to be logged in.

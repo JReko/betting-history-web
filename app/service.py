@@ -13,50 +13,47 @@ class Service:
         utc_end = UtilityTimeZone.get_day_end_datetime_utc(date)
 
         stats = {}
-
-        capper_rows = Bet.get_distinct_cappers_for_day(utc_start, utc_end)
+        sorted_capper_stats = {}
         bets = Bet.get_bets_for_day(utc_start, utc_end)
-
-        for row in capper_rows:
-            stats[row['capper']] = {
-                "bets": 0,
-                "winning_bets": 0,
-                "losing_bets": 0,
-                "refunded_bets": 0,
-                "pending_bets": 0,
-                "settled_bets": 0,
-                "profits": 0,
-                "total_stake": 0,
-                "roi": 0.00,
-            }
-
         for bet in bets:
-            if bet.capper is None:
-                continue
-            stats[bet.capper]['bets'] += 1
-            if bet.status == "Settled":
-                stats[bet.capper]['settled_bets'] += 1
-                if bet.result == "Win":
-                    stats[bet.capper]['winning_bets'] += 1
-                    stats[bet.capper]['total_stake'] += bet.stake_amount
-                    stats[bet.capper]['profits'] += bet.potential_win_amount
-                elif bet.result == "Loss":
-                    stats[bet.capper]['losing_bets'] += 1
-                    stats[bet.capper]['total_stake'] += bet.stake_amount
-                    stats[bet.capper]['profits'] -= bet.stake_amount
-                elif bet.result == "Refunded":
-                    stats[bet.capper]['refunded_bets'] += 1
-            else:
-                stats[bet.capper]['pending_bets'] += 1
+            if bet.capper:
+                if bet.capper not in stats:
+                    stats[bet.capper] = {
+                        "bets": 0,
+                        "winning_bets": 0,
+                        "losing_bets": 0,
+                        "refunded_bets": 0,
+                        "pending_bets": 0,
+                        "settled_bets": 0,
+                        "profits": 0,
+                        "total_stake": 0,
+                        "roi": 0.00,
+                    }
 
-        for capper, capper_stats in stats.items():
-            if capper_stats['total_stake'] > 0:
-                capper_stats['roi'] = (capper_stats['profits'] / capper_stats['total_stake']) * 100
+                stats[bet.capper]['bets'] += 1
+                if bet.status == "Settled":
+                    stats[bet.capper]['settled_bets'] += 1
+                    if bet.result == "Win":
+                        stats[bet.capper]['winning_bets'] += 1
+                        stats[bet.capper]['total_stake'] += bet.stake_amount
+                        stats[bet.capper]['profits'] += bet.potential_win_amount
+                    elif bet.result == "Loss":
+                        stats[bet.capper]['losing_bets'] += 1
+                        stats[bet.capper]['total_stake'] += bet.stake_amount
+                        stats[bet.capper]['profits'] -= bet.stake_amount
+                    elif bet.result == "Refunded":
+                        stats[bet.capper]['refunded_bets'] += 1
+                else:
+                    stats[bet.capper]['pending_bets'] += 1
 
-        # Sort the stats dictionary by 'profits' in descending order
-        sorted_stats = dict(sorted(stats.items(), key=lambda x: x[1]['profits'], reverse=True))
+            for capper, capper_stats in stats.items():
+                if capper_stats['total_stake'] > 0:
+                    capper_stats['roi'] = (capper_stats['profits'] / capper_stats['total_stake']) * 100
 
-        return sorted_stats
+            # Sort the stats dictionary by 'profits' in descending order
+            sorted_capper_stats = dict(sorted(stats.items(), key=lambda x: x[1]['profits'], reverse=True))
+
+        return sorted_capper_stats
 
     @staticmethod
     def fetch_bets_for_date(date: datetime):
@@ -77,7 +74,7 @@ class Service:
         # Convert event_date to user's timezone and calculate profit
         current_profit = 0
         for bet in result_bets:
-            bet.event_date = UtilityTimeZone.convert_utc_datetime_to_user_time_zone(bet.event_date, user_timezone)
+            bet.event_date = UtilityTimeZone.convert_utc_datetime_to_user_time_zone(bet.event_date)
             if bet.status == "Settled" and bet.result == "Win":
                 current_profit += bet.potential_win_amount
             elif bet.status == "Settled" and bet.result == "Loss":

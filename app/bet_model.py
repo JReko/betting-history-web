@@ -1,5 +1,5 @@
 from flask_login import current_user
-from sqlalchemy import text, ForeignKey, Integer, Column
+from sqlalchemy import text, ForeignKey, Integer, Column, Index
 from sqlalchemy.orm import relationship
 
 from app import db
@@ -24,6 +24,11 @@ class Bet(db.Model):
     book = db.Column(db.String(50))
     account_id = Column(Integer, ForeignKey('accounts.id'), nullable=False)
     account = relationship('Account', backref='bets')
+
+    # Define indexes
+    __table_args__ = (
+        Index('idx_event_date_capper_account', 'event_date', 'capper', 'account_id'),
+    )
 
     @staticmethod
     def get_distinct_cappers_for_day(start_of_day_utc, end_of_day_utc):

@@ -42,7 +42,16 @@ This application is designed to help you track your bets and analyze your bettin
 - `heroku config:get DATABASE_URL` if you want to actually see it from your own eyes
 
 #### Migrate
-- test
+- `heroku run flask db upgrade`
+
+#### Backup
+- `heroku pg:backups`
+- `heroku pg:backups:capture --app betting-history-web`
+
+#### Local to heroku
+- `docker exec -it bet_tracking_postgres pg_dump --no-acl --no-owner -U local_user -d betting_history_web > dump_now.sql`
+- `heroku pg:psql DATABASE_URL --app betting-history-web < dump_now.sql`
+- For whatever reason I cannot get their over http link import to work, it never downloads the sql file at all and I've confirmed many times that it's publicly available
 
 #### Logs
 - `heroku logs --tail`
