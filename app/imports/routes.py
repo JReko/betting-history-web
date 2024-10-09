@@ -34,7 +34,7 @@ def import_pinnacle_bets():
             scraper.import_bet()
 
         flash('Bets imported successfully!', 'success')
-        return redirect(url_for('todays_bets'))
+        return redirect(url_for('bet.todays_bets'))
 
 
 @import_bp.route("/bet/auto_import_pinnacle_bets", methods=["GET", "POST"])
