@@ -2,6 +2,8 @@ import calendar
 from datetime import datetime
 import pytz
 from flask import Blueprint, render_template, redirect, url_for
+from flask_login import current_user
+
 from app.bet_model import Bet
 from app.utility_time_zone import UtilityTimeZone
 
@@ -27,7 +29,8 @@ def calendar_view(year, month):
     monthly_bets = Bet.query.filter(
         Bet.event_date >= start_of_the_month_utc,
         Bet.event_date <= end_of_the_month_utc.strftime('%Y-%m-%d %H:%M:%S'),
-        Bet.status == 'Settled'
+        Bet.status == 'Settled',
+        Bet.account_id == current_user.get_id(),
     ).all()
 
     # Calculate daily profits
