@@ -36,12 +36,24 @@
             <label for="line" class="form-label">Line (American odds)</label>
             <input type="text" id="line" name="line" class="form-control" pattern="[-+]?[0-9]+" title="Please enter a valid American odds line (e.g., +110 or -225)" value="{{ bet.line }}" required>
         </div>
-        <input type="hidden" id="creation_date" name="creation_date" value="{{ creation_date }}">
-
         <div class="mb-3">
-            <label for="sport" class="form-label">sport</label>
-            <input type="text" id="sport" name="sport" class="form-control" value="{{ bet.sport }}" required>
+            <label for="sport" class="form-label">Sport/League</label>
+            <select id="sport" name="sport" class="form-select" required>
+                <option value="Hockey - NHL" {% if bet.sport == 'Hockey - NHL' %}selected{% endif %}>Hockey - NHL</option>
+                <option value="Football - NFL" {% if bet.sport == 'Football - NFL' %}>Football - NFL</option>
+                <option value="Football - NCAA" {% if bet.sport == 'Football - NCAA' %}>Football - NCAA</option>
+                <option value="Baseball - MLB" {% if bet.sport == 'Baseball - MLB' %}>Baseball - MLB</option>
+                <option value="Baseball - KBO" {% if bet.sport == 'Baseball - KBO' %}>Baseball - KBO</option>
+                <option value="Tennis - ATP" {% if bet.sport == 'Tennis - ATP' %}>Tennis - ATP</option>
+                <option value="Tennis - WTA" {% if bet.sport == 'Tennis - WTA' %}>Tennis - WTA</option>
+                <option value="MMA - UFC" {% if bet.sport == 'MMA - UFC' %}>MMA - UFC</option>
+                <option value="Soccer" {% if bet.sport == 'Soccer' %}>Soccer</option>
+                <option value="Basketball - NBA" {% if bet.sport == 'Basketball - NBA' %}>Basketball - NBA</option>
+                <option value="Basketball - NCAA" {% if bet.sport == 'Basketball - NCAA' %}>Basketball - NCAA</option>
+                <option value="Basketball - Euroleague" {% if bet.sport == 'Basketball - Euroleague' %}>Basketball - Euroleague</option>
+            </select>
         </div>
+
         <div class="mb-3">
             <label for="event_date" class="form-label">Event Date</label>
             <input type="datetime-local" id="event_date" name="event_date" class="form-control" value="{{ bet.event_date }}" required>
