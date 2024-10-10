@@ -47,6 +47,14 @@ This application is designed to help you track your bets and analyze your bettin
 #### Backup
 - `heroku pg:backups`
 - `heroku pg:backups:capture --app betting-history-web`
+- `heroku pg:backups:download --app betting-history-web` to download latest backup to local
+- `docker cp ./latest.dump bet_tracking_postgres:/tmp/latest.dump` to copy our dump into the container
+- `docker exec -it bet_tracking_postgres pg_restore --verbose --clean --no-acl --no-owner -h localhost -U local_user -d betting_history_web /tmp/latest.dump` to restore
+
+#### Automated Backup
+- `heroku pg:backups:schedule DATABASE_URL --at '04:00 America/Montreal' --app betting-history-web`
+- `heroku pg:backups --app betting-history-web`
+
 
 #### Local to heroku
 - `docker exec -it bet_tracking_postgres pg_dump --no-acl --no-owner -U local_user -d betting_history_web > dump_now.sql`
