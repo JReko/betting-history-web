@@ -18,6 +18,7 @@
                 <option value="Pinnacle" {% if bet.book == 'Pinnacle' %}selected{% endif %}>Pinnacle</option>
                 <option value="Bet365" {% if bet.book == 'Bet365' %}selected{% endif %}>Bet365</option>
                 <option value="Bet99" {% if bet.book == 'Bet99' %}selected{% endif %}>Bet99</option>
+                <option value="Other" {% if bet.book == 'Other' %}selected{% endif %}>Other</option>
             </select>
         </div>
         <div class="mb-3">
@@ -29,10 +30,6 @@
             <input type="number" step="0.01" id="amount" name="amount" class="form-control" value="{{ bet.stake_amount }}" required>
         </div>
         <div class="mb-3">
-            <label for="potential_win_amount" class="form-label">Potential Win Amount</label>
-            <input type="number" step="0.01" id="potential_win_amount" name="potential_win_amount" class="form-control" value="{{ bet.potential_win_amount }}" required>
-        </div>
-        <div class="mb-3">
             <label for="line" class="form-label">Line (American odds)</label>
             <input type="text" id="line" name="line" class="form-control" pattern="[-+]?[0-9]+" title="Please enter a valid American odds line (e.g., +110 or -225)" value="{{ bet.line }}" required>
         </div>
@@ -40,17 +37,17 @@
             <label for="sport" class="form-label">Sport/League</label>
             <select id="sport" name="sport" class="form-select" required>
                 <option value="Hockey - NHL" {% if bet.sport == 'Hockey - NHL' %}selected{% endif %}>Hockey - NHL</option>
-                <option value="Football - NFL" {% if bet.sport == 'Football - NFL' %}>Football - NFL</option>
-                <option value="Football - NCAA" {% if bet.sport == 'Football - NCAA' %}>Football - NCAA</option>
-                <option value="Baseball - MLB" {% if bet.sport == 'Baseball - MLB' %}>Baseball - MLB</option>
-                <option value="Baseball - KBO" {% if bet.sport == 'Baseball - KBO' %}>Baseball - KBO</option>
-                <option value="Tennis - ATP" {% if bet.sport == 'Tennis - ATP' %}>Tennis - ATP</option>
-                <option value="Tennis - WTA" {% if bet.sport == 'Tennis - WTA' %}>Tennis - WTA</option>
-                <option value="MMA - UFC" {% if bet.sport == 'MMA - UFC' %}>MMA - UFC</option>
-                <option value="Soccer" {% if bet.sport == 'Soccer' %}>Soccer</option>
-                <option value="Basketball - NBA" {% if bet.sport == 'Basketball - NBA' %}>Basketball - NBA</option>
-                <option value="Basketball - NCAA" {% if bet.sport == 'Basketball - NCAA' %}>Basketball - NCAA</option>
-                <option value="Basketball - Euroleague" {% if bet.sport == 'Basketball - Euroleague' %}>Basketball - Euroleague</option>
+                <option value="Football - NFL" {% if bet.sport == 'Football - NFL' %}selected{% endif %}>Football - NFL</option>
+                <option value="Football - NCAA" {% if bet.sport == 'Football - NCAA' %}selected{% endif %}>Football - NCAA</option>
+                <option value="Baseball - MLB" {% if bet.sport == 'Baseball - MLB' %}selected{% endif %}>Baseball - MLB</option>
+                <option value="Baseball - KBO" {% if bet.sport == 'Baseball - KBO' %}selected{% endif %}>Baseball - KBO</option>
+                <option value="Tennis - ATP" {% if bet.sport == 'Tennis - ATP' %}selected{% endif %}>Tennis - ATP</option>
+                <option value="Tennis - WTA" {% if bet.sport == 'Tennis - WTA' %}selected{% endif %}>Tennis - WTA</option>
+                <option value="MMA - UFC" {% if bet.sport == 'MMA - UFC' %}selected{% endif %}>MMA - UFC</option>
+                <option value="Soccer" {% if bet.sport == 'Soccer' %}selected{% endif %}>Soccer</option>
+                <option value="Basketball - NBA" {% if bet.sport == 'Basketball - NBA' %}selected{% endif %}>Basketball - NBA</option>
+                <option value="Basketball - NCAA" {% if bet.sport == 'Basketball - NCAA' %}selected{% endif %}>Basketball - NCAA</option>
+                <option value="Basketball - Euroleague" {% if bet.sport == 'Basketball - Euroleague' %}selected{% endif %}>Basketball - Euroleague</option>
             </select>
         </div>
 

@@ -23,7 +23,6 @@ def bet_create():
             bet_id = Bet.get_next_bet99_id()
         capper = request.form.get("capper")
         amount = float(request.form.get("amount"))
-        potential_win_amount = float(request.form.get("potential_win_amount"))
         event_date_string = request.form.get("event_date")
         event_date = datetime.strptime(event_date_string, '%Y-%m-%dT%H:%M')
         event_date_utc_string = UtilityTimeZone.convert_to_utc(event_date.strftime('%Y-%m-%d %H:%M:%S'))
@@ -32,8 +31,8 @@ def bet_create():
         pick = request.form.get("pick")
         status = request.form.get("status")
         result = request.form.get("result") if request.form.get("result") != "None" else None
-
         line = request.form.get("line")
+        potential_win_amount = Service.calculate_potential_win_amount(float(amount), int(line))
 
         # Create new bet object
         bet = Bet(
@@ -69,7 +68,6 @@ def bet_edit(user_inputted_bet_id):
         book = request.form.get("book")
         capper = request.form.get("capper")
         amount = float(request.form.get("amount"))
-        potential_win_amount = float(request.form.get("potential_win_amount"))
         event_date = request.form.get("event_date")
         sport = request.form.get("sport")
         event_match = request.form.get("event_match")
@@ -77,6 +75,7 @@ def bet_edit(user_inputted_bet_id):
         status = request.form.get("status")
         result = request.form.get("result") if request.form.get("result") != "None" else None
         line = request.form.get("line")
+        potential_win_amount = Service.calculate_potential_win_amount(float(amount), int(line))
 
         bet = Bet.query.get(bet_id)
         bet.book = book
@@ -98,8 +97,7 @@ def bet_edit(user_inputted_bet_id):
         return redirect(url_for('bet.todays_bets'))  # Redirect to the bets page
 
     elif request.method == "GET":
-
-        bet = Bet.query.get(user_inputted_bet_id)
+        bet: Bet = Bet.query.get(user_inputted_bet_id)
         bet.event_date = UtilityTimeZone.convert_utc_datetime_to_user_time_zone(bet.event_date)
 
         # If no bet is found, return a 404 error

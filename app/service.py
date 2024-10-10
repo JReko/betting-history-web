@@ -96,3 +96,15 @@ class Service:
         total_stake_pending = sum(bet.stake_amount for bet in pending_bets)
 
         return sorted_bets, num_pending, total_stake_pending, current_profit
+
+    @staticmethod
+    def calculate_potential_win_amount(stake: float, odds: int) -> float:
+        if odds > 0:
+            # Positive American odds
+            return stake * (odds / 100)
+        elif odds < 0:
+            # Negative American odds
+            return stake * (100 / abs(odds))
+        else:
+            # Odds of 0 is not valid
+            raise ValueError("Odds cannot be zero")
