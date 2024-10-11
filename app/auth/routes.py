@@ -9,6 +9,9 @@ auth_bp = Blueprint('auth', __name__)
 # Registration Route
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        abort(401, "You are already logged in.")
+
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -28,6 +31,9 @@ def register():
 # Login Route
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        abort(401, "You are already logged in.")
+        
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
