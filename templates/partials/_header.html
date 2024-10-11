@@ -2,7 +2,7 @@
 <header class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom py-3">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="/">
-            <!-- <img src="https://png.pngtree.com/png-vector/20220119/ourmid/pngtree-sports-logo-icon-picture-png-image_4225320.png" alt="Logo" height="30" class="d-inline-block align-text-top">--> BetTracker
+            BetTracker
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -12,12 +12,17 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link" href="/bets/today">
-                        <i class="bi bi-calendar2-check"></i> Today's Bets
+                        <i class="bi bi-calendar2-check"></i> Today
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/calendar">
-                        <i class="bi bi-calendar3"></i> Calendar
+                        <i class="bi bi-calendar-month"></i> Monthly
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/bets/overall">
+                        <i class="bi bi-graph-up"></i> Overall
                     </a>
                 </li>
                 <li class="nav-item">
@@ -36,7 +41,7 @@
                     <a class="nav-link dropdown-toggle" href="#" id="account" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle"></i>  {{ email if email else 'My Account' }}
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account"> <!-- Added dropdown-menu-end -->
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account">
                         <li><a class="dropdown-item" href="/account/settings">Settings</a></li>
                         <li><a class="dropdown-item" href="/account/edit">Edit My Account</a></li>
                         <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>

@@ -71,7 +71,7 @@
             <!-- Ensure positive lines display + sign -->
             <td>{{ bet.line if bet.line < 0 else '+' + bet.line|string }}</td>
             <td>{{ bet.event_date[5:] }}</td>
-            <td>{{ bet.capper|default('', true)|truncate(12, True, '...') }}</td>
+            <td><a href="/capper/{{ bet.capper }}">{{ bet.capper|default('', true)|truncate(12, True, '...') }}</a></td>
 
             <td>
                 {% if bet.result == 'Win' %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Bets Overview{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="text-center mb-4">Bets Overview</h1>
+
+    <!-- Overall Profits -->
+    <div class="overall-profits card mb-4">
+        <div class="card-header bg-light">
+            <h2 class="mb-0 text-dark">Overall Profits</h2>
+        </div>
+        <div class="card-body text-center">
+            <h3 class="font-weight-bold {% if total_profits < 0 %}text-danger{% else %}text-success{% endif %}">
+                {{ total_profits | round(2) }}$
+            </h3>
+        </div>
+    </div>
+
+    <!-- Yearly Profits Table -->
+    <div class="yearly-profits card mb-4">
+        <div class="card-header bg-light">
+            <h2 class="mb-0 text-dark">Yearly Profits</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Year</th>
+                        <th>Total Profits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for year, profits in yearly_profits.items() %}
+                        <tr>
+                            <td>{{ year }}</td>
+                            <td class="{% if profits < 0 %}text-danger{% else %}text-success{% endif %}">
+                                <strong>{{ profits | round(2) }}$</strong>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Monthly Stats Table -->
+    <div class="monthly-stats card">
+        <div class="card-header bg-light">
+            <h2 class="mb-0 text-dark">Monthly Stats</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Month</th>
+                        <th>Bets Count</th>
+                        <th>Settled Bets</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Refunded</th>
+                        <th>Profits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in stats %}
+                        <tr>
+                            <td>{{ stat['month'].strftime('%B %Y') }}</td>
+                            <td>{{ stat['bets_count'] }}</td>
+                            <td>{{ stat['settled_bets_count'] }}</td>
+                            <td>{{ stat['winning_bets_count'] }}</td>
+                            <td>{{ stat['losing_bets_count'] }}</td>
+                            <td>{{ stat['refunded_bets_count'] }}</td>
+                            <td class="{% if stat['profits'] < 0 %}text-danger{% else %}text-success{% endif %}">
+                                <strong>{{ stat['profits'] | round(2) }}$</strong>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

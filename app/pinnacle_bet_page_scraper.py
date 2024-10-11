@@ -61,24 +61,36 @@ class PinnacleBetPageScraper:
         if i:
             sport = i['class'][0].replace('icon-', '')
 
-        # league
+        # Event information
         div = bet.find('div', class_='descLabel-cff62e4d8b43253a2856 marketLeague-ae76eaa0da8b52c27a31')
+        event_information_text = None
         if div:
-            text = div.get_text()
-            if sport == "hockey" and "NHL" in text.upper():
+            event_information_text = div.get_text()
+            # Hockey
+            if sport == "hockey" and "NHL" in event_information_text.upper():
                 sport = f"{sport} - NHL"
-            elif sport == "tennis" and "ATP" in text.upper():
+            # Tennis
+            elif sport == "tennis" and "ATP" in event_information_text.upper():
                 sport = f"{sport} - ATP"
-            elif sport == "tennis" and "WTA" in text.upper():
+            elif sport == "tennis" and "WTA" in event_information_text.upper():
                 sport = f"{sport} - WTA"
-            elif sport == "baseball" and "MLB" in text.upper():
+            # Baseball
+            elif sport == "baseball" and "MLB" in event_information_text.upper():
                 sport = f"{sport} - MLB"
-            elif sport == "baseball" and "KOREA" in text.upper():
+            elif sport == "baseball" and "KOREA" in event_information_text.upper():
                 sport = f"{sport} - KBO"
-            elif sport == "football" and "NFL" in text.upper():
+            # Football
+            elif sport == "football" and "NFL" in event_information_text.upper():
                 sport = f"{sport} - NFL"
-            elif sport == "football" and "NCAA" in text.upper():
+            elif sport == "football" and "NCAA" in event_information_text.upper():
                 sport = f"{sport} - NCAA"
+            # Basketball
+            elif sport == "basketball" and "NBA" in event_information_text.upper():
+                sport = f"{sport} - NBA"
+            elif sport == "basketball" and "NCAA" in event_information_text.upper():
+                sport = f"{sport} - NCAA"
+            elif sport == "basketball" and "Euroleague" in event_information_text.upper():
+                sport = f"{sport} - Euroleague"
 
         # *** Stake & potential win amounts
         divs = bet.find_all('div', class_="flex-d3c12ab93880fc84f91a")
@@ -139,6 +151,10 @@ class PinnacleBetPageScraper:
             pick = pick.rstrip(' + ')
         else:
             pick = inner_div_value.get_text().replace('(Sets) (Sets)', '(Sets)').replace('(Games) (Games)', '(Games)').strip()
+
+        # 1st Half bets
+        if event_information_text and "1ST H" in event_information_text.upper():
+            pick = f"{pick} - 1H"
 
         # *** Accepted and Settled dates
         inner_div_value = bet.find('div', class_="container-ff6d881f7592bf85eb4d inline-f3de3c46c55dfbeac4d8")

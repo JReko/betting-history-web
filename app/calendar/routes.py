@@ -20,6 +20,19 @@ def calendar_view(year, month):
     local_tz = pytz.timezone('America/Montreal')
     utc = pytz.utc
 
+    if month == 12:
+        next_month_int = 1
+        next_year_int = year + 1
+    else:
+        next_month_int = month + 1
+        next_year_int = year
+    if month == 1:
+        previous_month_int = 12
+        previous_year_int = year - 1
+    else:
+        previous_month_int = month - 1
+        previous_year_int = year
+
     start_of_the_month_utc = UtilityTimeZone.get_day_start_datetime_utc(f"{year}-{month}-1")
 
     last_day_of_month = start_of_the_month_utc.replace(day=calendar.monthrange(year, month)[1])
@@ -53,7 +66,19 @@ def calendar_view(year, month):
             total_profits -= bet.stake_amount
 
     # Pass the calendar module, daily profits, and selected month info to the template
-    return render_template('calendar.html', daily_profits=daily_profits, total_profits=total_profits, month_int=month, month_str=calendar.month_name[month], year=year, calendar=calendar, datetime=datetime)
+    return render_template(
+        'calendar.html',
+        daily_profits=daily_profits,
+        total_profits=total_profits,
+        month_int=month,
+        month_str=calendar.month_name[month],
+        year=year,
+        calendar=calendar,
+        next_month_int=next_month_int,
+        next_year_int=next_year_int,
+        previous_month_int=previous_month_int,
+        previous_year_int=previous_year_int,
+    )
 
 
 @calendar_bp.route("/calendar")

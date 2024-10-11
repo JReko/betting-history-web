@@ -32,9 +32,15 @@ h2 strong {
         <!-- Left Card: Month and Year -->
         <div class="col-md-6">
             <div class="card text-center p-4 shadow-sm bg-light rounded">
-                <h5 class="mb-2 text-uppercase text-muted" style="font-size: 1.1rem;">Month</h5>
+                <div class="d-flex justify-content-center align-items-center">
+                    <h5 class="mb-2 text-uppercase text-muted" style="font-size: 1.1rem;">
+                        <a href="{{ url_for('calendar.calendar_view', year=previous_year_int, month=previous_month_int) }}" class="text-muted">&#8592;</a>
+                        Month
+                        <a href="{{ url_for('calendar.calendar_view', year=next_year_int, month=next_month_int) }}" class="text-muted">&#8594;</a>
+                    </h5>
+                </div>
                 <h4 class="mb-0">
-                    <strong>{{ month_str }} {{ year }}</strong>
+                    {{ month_str }} {{ year }}
                 </h4>
             </div>
         </div>

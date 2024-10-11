@@ -71,6 +71,22 @@ class Bet(db.Model):
         return bets
 
     @staticmethod
+    def get_overall_bets():
+        account_id = current_user.get_id()
+        query = text('''
+                SELECT * 
+                FROM bets
+                WHERE 
+                    status = 'Settled'
+                    AND capper IS NOT NULL
+                    AND account_id = :account_id
+            ''')
+        bets = db.session.execute(query, {
+            'account_id': account_id
+        }).mappings().fetchall()
+        return bets
+
+    @staticmethod
     def get_next_bet365_id():
         query = text("""
             SELECT MAX(CAST(SUBSTRING(bet_id FROM LENGTH('bet365_') + 1) AS INTEGER)) AS max_id
