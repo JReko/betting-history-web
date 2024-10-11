@@ -89,8 +89,8 @@ def bet_edit(user_inputted_bet_id):
         bet.sport = sport
         bet.pick = pick
         event_date = datetime.strptime(event_date, '%Y-%m-%dT%H:%M')
-        event_date_string = event_date.strftime("%Y-%m-%d %H:%M:%S")
-        bet.event_date = event_date_string
+        event_date_utc_string = UtilityTimeZone.convert_to_utc(event_date.strftime('%Y-%m-%d %H:%M:%S'))
+        bet.event_date = event_date_utc_string
         bet.capper = capper
 
         db.session.commit()
