@@ -84,8 +84,8 @@ def cappers_read():
     WHERE 
         capper IS NOT NULL
         AND account_id = :account_id
-    GROUP BY c
-        apper
+    GROUP BY
+        capper
     """)
 
     # Execute the raw SQL query
