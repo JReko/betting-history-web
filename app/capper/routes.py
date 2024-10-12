@@ -5,6 +5,7 @@ from sqlalchemy import func, text
 from app import db
 from app.bet_model import Bet
 from app.capper_model import Capper
+from app.capper_queries import CapperQueries
 
 capper_bp = Blueprint('capper', __name__)
 
@@ -33,75 +34,27 @@ def assign_cappers():
 
 @capper_bp.route("/capper/<user_inputted_capper_id>", methods=["GET"])
 def capper_read(user_inputted_capper_id: str):
-    if request.method == "GET":
-        account_id = current_user.get_id()
+    bets = CapperQueries.get_all_capper_bets(user_inputted_capper_id)
 
-        query = text("""
-            SELECT
-                *
-            FROM bets
-            WHERE capper IS NOT NULL
-            AND account_id = :account_id
-            AND capper = :capper_id
-            ORDER BY event_date ASC
-        """)
+    # Calculate cumulative sum
+    cumulative_sum = []
+    current_sum = 0.0
 
-        # Execute the raw SQL query
-        bets = db.session.execute(query, {
-            "account_id": account_id,
-            "capper_id": user_inputted_capper_id,
-        }).fetchall()
+    for bet in bets:
+        if bet.status == 'Settled':
+            if bet.result == 'Win':
+                current_sum += bet.potential_win_amount
+            elif bet.result == 'Loss':
+                current_sum -= bet.stake_amount
+        cumulative_sum.append(current_sum)
 
-        # Calculate cumulative sum
-        cumulative_sum = []
-        current_sum = 0.0
+    # Combine bets and cumulative_sum into a list of tuples
+    bets_with_cumulative_sum = list(zip(bets, cumulative_sum))
 
-        for bet in bets:
-            if bet.status == 'Settled':
-                if bet.result == 'Win':
-                    current_sum += bet.potential_win_amount
-                elif bet.result == 'Loss':
-                    current_sum -= bet.stake_amount
-            cumulative_sum.append(current_sum)
+    by_sport_results = CapperQueries.get_all_capper_bets_by_sport(user_inputted_capper_id)
 
-        # Combine bets and cumulative_sum into a list of tuples
-        bets_with_cumulative_sum = list(zip(bets, cumulative_sum))
+    return render_template("capper/read.html", capper=user_inputted_capper_id, bets_with_cumulative_sum=bets_with_cumulative_sum, sport_results=by_sport_results)
 
-        return render_template("capper/read.html", capper=user_inputted_capper_id, bets_with_cumulative_sum=bets_with_cumulative_sum)
-    else:
-        abort(404)
-
-
-# @capper_bp.route("/cappers", methods=["GET"])
-# def cappers_read():
-#     account_id = current_user.get_id()
-#     unique_cappers = db.session.query(Bet.capper).filter(Bet.account_id == account_id).distinct().all()
-#     unique_cappers_list = [capper[0] for capper in unique_cappers]
-#     cappers_output = {}
-#     for capper_id in unique_cappers_list:
-#         if capper_id:
-#             capper = Capper(capper_id)
-#             bets_count, settled_bets_count, winning_bets_count, losing_bets_count, refunded_bets_count, pending_bets_count, bet_count_error = capper.get_bet_counts()
-#             cappers_output[capper_id] = {
-#                 "bets_count": bets_count,
-#                 "settled_bets_count": settled_bets_count,
-#                 "winning_bets_count": winning_bets_count,
-#                 "losing_bets_count": losing_bets_count,
-#                 "refunded_bets_count": refunded_bets_count,
-#                 "pending_bets_count": pending_bets_count,
-#                 "bet_count_error": bet_count_error,
-#                 "profits": capper.get_profits(),
-#                 "roi": capper.get_roi(),
-#             }
-#
-#     # Sort cappers_output: prioritize cappers with 10+ settled bets first, then sort by ROI
-#     sorted_cappers = sorted(
-#         cappers_output.items(),
-#         key=lambda x: (x[1]['settled_bets_count'] < 10, -x[1]['roi'])
-#     )
-#     sorted_cappers_output = dict(sorted_cappers)
-#
-#     return render_template("cappers/read.html", cappers=sorted_cappers_output)
 
 @capper_bp.route("/cappers", methods=["GET"])
 def cappers_read():
@@ -126,10 +79,13 @@ def cappers_read():
                 WHEN status = 'Settled' AND result != 'Refunded' THEN stake_amount
                 ELSE 0 
             END) AS total_stake
-    FROM bets
-    WHERE capper IS NOT NULL
-    AND account_id = :account_id
-    GROUP BY capper
+    FROM 
+        bets
+    WHERE 
+        capper IS NOT NULL
+        AND account_id = :account_id
+    GROUP BY c
+        apper
     """)
 
     # Execute the raw SQL query

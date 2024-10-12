@@ -114,14 +114,49 @@
             <td>{{ results.pending_bets }}</td>
             <td>
                 {% if results.profits > 0 %}
-                    +{{ "{:.2f}".format(results.profits) }}$
+                    <span class="text-success">+{{ "{:.2f}".format(results.profits) }}$</span>
                 {% elif results.profits < 0 %}
-                    {{ "{:.2f}".format(results.profits) }}$
+                    <span class="text-danger">{{ "{:.2f}".format(results.profits) }}$</span>
                 {% else %}
                     {{ "{:.2f}".format(results.profits) }}$
                 {% endif %}
             </td>
             <td>{{ "{:.2f}".format(results.roi) }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<!-- Display By Sport Results if available -->
+<table class="table table-bordered table-sm table-hover">
+    <thead>
+        <tr>
+            <th style="width: 5%;">#</th>
+            <th>Sport</th>
+            <th style="width: 15%;">Total Bets</th>
+            <th style="width: 15%;">Wins</th>
+            <th style="width: 15%;">Losses</th>
+            <th style="width: 15%;">Refunded</th>
+            <th style="width: 15%;">Profits</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stats in by_sport_results %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ stats.sport }}</td>
+            <td>{{ stats.total_bets_count }}</td>
+            <td>{{ stats.winning_bets_count }}</td>
+            <td>{{ stats.losing_bets_count }}</td>
+            <td>{{ stats.refunded_bets_count }}</td>
+            <td>
+                {% if stats.profits > 0 %}
+                    <span class="text-success">+{{ "%.2f"|format(stats.profits) }}$</span>
+                {% elif stats.profits < 0 %}
+                    <span class="text-danger">{{ "%.2f"|format(stats.profits) }}$</span>
+                {% else %}
+                    {{ "%.2f"|format(stats.profits) }}$
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>

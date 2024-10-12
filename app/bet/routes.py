@@ -6,6 +6,7 @@ from app import db
 from app.bet_model import Bet
 from datetime import datetime, timedelta
 
+from app.bet_queries import BetQueries
 from app.pinnacle_bet_page_scraper import PinnacleBetPageScraper
 from app.service import Service
 from app.utility_time_zone import UtilityTimeZone
@@ -132,6 +133,10 @@ def bets_by_date(date: str):
     # Fetch and process the bets for the given date
     sorted_bets, num_pending, total_stake_pending, current_profit = Service.fetch_bets_for_date(user_provided_date)
 
+    date_day_start = UtilityTimeZone.get_day_start_datetime_tz(date)
+    date_day_end = UtilityTimeZone.get_day_end_datetime_tz(date)
+    by_sport_results = BetQueries.get_bets_for_day_by_sport(date_day_start, date_day_end)
+
     # Pass data to the template
     return render_template(
         'bets/read.html',
@@ -142,7 +147,8 @@ def bets_by_date(date: str):
         num_pending=num_pending,
         total_stake_pending=total_stake_pending,
         current_profit=current_profit,
-        cappers_stats=cappers_stats
+        cappers_stats=cappers_stats,
+        by_sport_results=by_sport_results,
     )
 
 
@@ -154,7 +160,6 @@ def bets_overall():
     query = text("""
         SELECT
             DATE_TRUNC('month', event_date AT TIME ZONE 'UTC' AT TIME ZONE :timezone) AS month,  -- Convert to user timezone and group by month
-            COUNT(bet_id) AS bets_count,
             SUM(CASE WHEN status = 'Settled' THEN 1 ELSE 0 END) AS settled_bets_count,
             SUM(CASE WHEN status = 'Settled' AND result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
             SUM(CASE WHEN status = 'Settled' AND result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
@@ -199,7 +204,9 @@ def bets_overall():
         yearly_profits[year] += row['profits']
 
     # Pass results, total profits, and yearly profits to the template
-    return render_template('bets/overall.html',
-                           stats=results,
-                           total_profits=total_profits,
-                           yearly_profits=yearly_profits)
+    return render_template(
+        'bets/overall.html',
+        stats=results,
+        total_profits=total_profits,
+        yearly_profits=yearly_profits
+    )

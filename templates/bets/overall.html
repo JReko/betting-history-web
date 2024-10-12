@@ -55,7 +55,6 @@
                 <thead class="thead-light">
                     <tr>
                         <th>Month</th>
-                        <th>Bets Count</th>
                         <th>Settled Bets</th>
                         <th>Wins</th>
                         <th>Losses</th>
@@ -67,7 +66,6 @@
                     {% for stat in stats %}
                         <tr>
                             <td>{{ stat['month'].strftime('%B %Y') }}</td>
-                            <td>{{ stat['bets_count'] }}</td>
                             <td>{{ stat['settled_bets_count'] }}</td>
                             <td>{{ stat['winning_bets_count'] }}</td>
                             <td>{{ stat['losing_bets_count'] }}</td>
