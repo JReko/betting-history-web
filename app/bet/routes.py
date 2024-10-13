@@ -115,40 +115,34 @@ def todays_bets():
     today = datetime.now(UtilityTimeZone.get_user_timezone())
     today_str = today.strftime("%Y-%m-%d")
 
-    return redirect(url_for('bet.bets_by_date', date=today_str))
+    return redirect(url_for('bet.bets_by_date', date_parameter=today_str))
 
 
-@bet_bp.route("/bets/<date>")
-def bets_by_date(date: str):
-    # Validate the format and prepare links
+@bet_bp.route("/bets/<date_parameter>")
+def bets_by_date(date_parameter: str):
     try:
-        user_provided_date = datetime.strptime(date, "%Y-%m-%d")
-        previous_day = (user_provided_date - timedelta(days=1)).strftime("%Y-%m-%d")
-        next_day = (user_provided_date + timedelta(days=1)).strftime("%Y-%m-%d")
+        date_datetime = datetime.strptime(date_parameter, "%Y-%m-%d")
     except ValueError:
         return "Invalid date format. Please use YYYY-MM-DD.", 400
 
-    cappers_stats = Service.get_cappers_stats_for_a_date(date)
+    # 1ST get bets for the date
+    sorted_bets_for_date, count_pending_bets, total_stake_pending_bets, current_profit = Service.fetch_bets_for_date(date_datetime)
+    # 2ND get a per capper report for the date
+    cappers_results_for_date = Service.get_bets_for_day_by_capper(date_datetime)
+    # 3RD get a per sport report for the date
+    by_sport_results_for_date = BetQueries.get_bets_for_day_by_sport(date_datetime)
 
-    # Fetch and process the bets for the given date
-    sorted_bets, num_pending, total_stake_pending, current_profit = Service.fetch_bets_for_date(user_provided_date)
-
-    date_day_start = UtilityTimeZone.get_day_start_datetime_tz(date)
-    date_day_end = UtilityTimeZone.get_day_end_datetime_tz(date)
-    by_sport_results = BetQueries.get_bets_for_day_by_sport(date_day_start, date_day_end)
-
-    # Pass data to the template
     return render_template(
         'bets/read.html',
-        date=date,
-        previous_day=previous_day,
-        next_day=next_day,
-        bets=sorted_bets,
-        num_pending=num_pending,
-        total_stake_pending=total_stake_pending,
+        date=date_parameter,
+        previous_day=(date_datetime - timedelta(days=1)).strftime("%Y-%m-%d"),
+        next_day=(date_datetime + timedelta(days=1)).strftime("%Y-%m-%d"),
+        bets=sorted_bets_for_date,
+        num_pending=count_pending_bets,
+        total_stake_pending=total_stake_pending_bets,
         current_profit=current_profit,
-        cappers_stats=cappers_stats,
-        by_sport_results=by_sport_results,
+        cappers_stats=cappers_results_for_date,
+        by_sport_results=by_sport_results_for_date,
     )
 
 

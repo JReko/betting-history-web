@@ -51,7 +51,7 @@ def capper_read(user_inputted_capper_id: str):
     # Combine bets and cumulative_sum into a list of tuples
     bets_with_cumulative_sum = list(zip(bets, cumulative_sum))
 
-    by_sport_results = CapperQueries.get_all_capper_bets(user_inputted_capper_id)
+    by_sport_results = CapperQueries.get_all_capper_bets_by_sport(user_inputted_capper_id)
 
     return render_template("capper/read.html", capper=user_inputted_capper_id, bets_with_cumulative_sum=bets_with_cumulative_sum, sport_results=by_sport_results)
 
@@ -96,8 +96,7 @@ def cappers_read():
     for row in result:
         capper_id = row.capper
         roi = (row.profits / row.total_stake) * 100 if row.total_stake != 0 else 0.00
-        bet_count_error = row.settled_bets_count != (
-                    row.winning_bets_count + row.losing_bets_count + row.refunded_bets_count)
+        bet_count_error = row.settled_bets_count != (row.winning_bets_count + row.losing_bets_count + row.refunded_bets_count)
 
         cappers_output[capper_id] = {
             "bets_count": row.bets_count,

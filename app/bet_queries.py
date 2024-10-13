@@ -1,13 +1,48 @@
+from datetime import datetime
+
 from flask_login import current_user
 from sqlalchemy import text
 from app import db
+from app.utility_time_zone import UtilityTimeZone
 
 
 class BetQueries:
     @staticmethod
-    def get_bets_for_day_by_sport(start_of_day, end_of_day, user_timezone='America/Montreal'):
-        account_id = current_user.get_id()  # Fetch the current user's account ID
+    def get_bets_for_date(date_datetime: datetime) -> list:
+        query = text("""
+            SELECT
+                bet_id,
+                book,
+                sport,
+                match,
+                pick,
+                stake_amount,
+                line,
+                event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone as event_date,
+                capper,
+                potential_win_amount,
+                status,
+                result
+            FROM
+                bets
+            WHERE
+                account_id = :account_id
+                AND event_date >= :start
+                AND event_date < :end
+                
+        """)
 
+        bets = db.session.execute(query, {
+            'account_id': current_user.get_id(),
+            'user_timezone': current_user.get_timezone(),
+            'start': UtilityTimeZone.get_day_start_datetime_utc(date_datetime.strftime("%Y-%m-%d")),
+            'end': UtilityTimeZone.get_day_end_datetime_utc(date_datetime.strftime("%Y-%m-%d")),
+        }).mappings().fetchall()
+
+        return bets
+
+    @staticmethod
+    def get_bets_for_day_by_sport(date_datetime: datetime) -> list:
         query = text("""
             SELECT
                 sport,
@@ -28,9 +63,9 @@ class BetQueries:
             FROM 
                 bets
             WHERE 
-                account_id = :account_id  -- Filter by account ID
-                AND event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone >= :start
-                AND event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone < :end
+                account_id = :account_id
+                AND event_date >= :start
+                AND event_date < :end
             GROUP BY 
                 sport
             ORDER BY 
@@ -39,11 +74,52 @@ class BetQueries:
 
         # Execute the query and pass the start/end of day in the user's timezone along with the timezone
         by_sport_results = db.session.execute(query, {
-            'start': start_of_day,
-            'end': end_of_day,
-            'account_id': account_id,
-            'user_timezone': user_timezone  # Pass the user's timezone to MySQL
+            'start': UtilityTimeZone.get_day_start_datetime_utc(date_datetime.strftime("%Y-%m-%d")),
+            'end': UtilityTimeZone.get_day_end_datetime_utc(date_datetime.strftime("%Y-%m-%d")),
+            'account_id': current_user.get_id(),
+            'user_timezone': current_user.get_timezone(),
         }).mappings().fetchall()
 
         return by_sport_results
 
+    @staticmethod
+    def get_bets_for_day_by_capper(date_datetime: datetime) -> list:
+        query = text("""
+               SELECT
+                   capper,
+                   COUNT(*) AS total_bets_count,
+                   SUM(CASE WHEN status = 'Settled' THEN 1 ELSE 0 END) AS settled_bets_count,
+                   SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_bets_count,
+                   SUM(CASE WHEN status = 'Settled' AND result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
+                   SUM(CASE WHEN status = 'Settled' AND result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
+                   SUM(CASE WHEN status = 'Settled' AND result = 'Refunded' THEN 1 ELSE 0 END) AS refunded_bets_count,
+                   SUM(CASE 
+                           WHEN status = 'Settled' AND result = 'Win' THEN potential_win_amount
+                           WHEN status = 'Settled' AND result = 'Loss' THEN -stake_amount
+                           ELSE 0 
+                       END) AS profits,
+                   SUM(CASE 
+                           WHEN status = 'Settled' AND result != 'Refunded' THEN stake_amount
+                           ELSE 0 
+                       END) AS total_stake
+               FROM 
+                   bets
+               WHERE 
+                   account_id = :account_id
+                   AND event_date >= :start
+                   AND event_date < :end
+               GROUP BY 
+                   capper
+               ORDER BY 
+                   profits DESC
+           """)
+
+        # Execute the query and pass the start/end of day in the user's timezone along with the timezone
+        by_capper_results = db.session.execute(query, {
+            'start': UtilityTimeZone.get_day_start_datetime_utc(date_datetime.strftime("%Y-%m-%d")),
+            'end': UtilityTimeZone.get_day_end_datetime_utc(date_datetime.strftime("%Y-%m-%d")),
+            'account_id': current_user.get_id(),
+            'user_timezone': current_user.get_timezone(),
+        }).mappings().fetchall()
+
+        return by_capper_results

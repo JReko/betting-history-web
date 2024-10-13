@@ -25,3 +25,8 @@ class Account(UserMixin, db.Model):
 
     def get_id(self):
         return f"{str(self.id)}"
+
+    # TODO Get from DB, if not set use UTC
+    @staticmethod
+    def get_timezone():
+        return "America/Montreal"

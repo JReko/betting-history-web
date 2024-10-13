@@ -52,25 +52,6 @@ class Bet(db.Model):
         return cappers
 
     @staticmethod
-    def get_bets_for_day(start_of_day_utc, end_of_day_utc):
-        account_id = current_user.get_id()
-        query = text('''
-            SELECT * 
-            FROM bets
-            WHERE 
-                event_date >= :start 
-                AND event_date < :end 
-                AND capper IS NOT NULL
-                AND account_id = :account_id
-        ''')
-        bets = db.session.execute(query, {
-            'start': start_of_day_utc,
-            'end': end_of_day_utc,
-            'account_id': account_id
-        }).mappings().fetchall()
-        return bets
-
-    @staticmethod
     def get_overall_bets():
         account_id = current_user.get_id()
         query = text('''

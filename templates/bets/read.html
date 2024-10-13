@@ -11,9 +11,9 @@
             <div class="card text-center p-4 shadow-sm bg-light rounded">
                 <div class="d-flex justify-content-center align-items-center">
                     <h5 class="mb-2 text-uppercase text-muted" style="font-size: 1.1rem;">
-                        <a href="{{ url_for('bet.bets_by_date', date=previous_day) }}" class="text-muted">&#8592;</a>
+                        <a href="{{ url_for('bet.bets_by_date', date_parameter=previous_day) }}" class="text-muted">&#8592;</a>
                         {{ date }}
-                        <a href="{{ url_for('bet.bets_by_date', date=next_day) }}" class="text-muted">&#8594;</a>
+                        <a href="{{ url_for('bet.bets_by_date', date_parameter=next_day) }}" class="text-muted">&#8594;</a>
                     </h5>
                 </div>
                 <h4 class="mb-0">
@@ -44,7 +44,7 @@
             <th style="">#</th>
             <th style="">Status</th>
             <th style="">Book</th>
-            <th style="">Sports</th>
+            <th style="">Sport</th>
             <th style="">Event/Match</th>
             <th style="">Pick</th>
             <th style="">Amount</th>
@@ -70,7 +70,7 @@
             <td>{{ "%.2f"|format(bet.stake_amount) }}$</td>
             <!-- Ensure positive lines display + sign -->
             <td>{{ bet.line if bet.line < 0 else '+' + bet.line|string }}</td>
-            <td>{{ bet.event_date[5:] }}</td>
+            <td>{{ bet.event_date.strftime('%Y-%m-%d %H:%M:%S')[5:] }}</td>
             <td><a href="/capper/{{ bet.capper }}">{{ bet.capper|default('', true)|truncate(12, True, '...') }}</a></td>
 
             <td>
@@ -106,12 +106,12 @@
         <tr>
             <td>{{ loop.index }}</td>
             <td>{{ capper }} {% if results.bet_count_error %}*{% endif %}</td>
-            <td>{{ results.bets }}</td>
-            <td>{{ results.settled_bets }}</td>
-            <td>{{ results.winning_bets }}</td>
-            <td>{{ results.losing_bets }}</td>
-            <td>{{ results.refunded_bets }}</td>
-            <td>{{ results.pending_bets }}</td>
+            <td>{{ results.bets_count }}</td>
+            <td>{{ results.settled_bets_count }}</td>
+            <td>{{ results.winning_bets_count }}</td>
+            <td>{{ results.losing_bets_count }}</td>
+            <td>{{ results.refunded_bets_count }}</td>
+            <td>{{ results.pending_bets_count }}</td>
             <td>
                 {% if results.profits > 0 %}
                     <span class="text-success">+{{ "{:.2f}".format(results.profits) }}$</span>
