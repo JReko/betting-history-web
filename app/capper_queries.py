@@ -27,7 +27,7 @@ class CapperQueries:
         return bets
 
     @staticmethod
-    def get_bets_for_day_by_sport(start_of_day, end_of_day, user_timezone='America/Montreal'):
+    def get_all_capper_bets_for_day_by_sport(start_of_day, end_of_day, user_timezone='America/Montreal'):
         account_id = current_user.get_id()  # Fetch the current user's account ID
 
         query = text("""

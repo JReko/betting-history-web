@@ -51,7 +51,7 @@ def capper_read(user_inputted_capper_id: str):
     # Combine bets and cumulative_sum into a list of tuples
     bets_with_cumulative_sum = list(zip(bets, cumulative_sum))
 
-    by_sport_results = CapperQueries.get_all_capper_bets_by_sport(user_inputted_capper_id)
+    by_sport_results = CapperQueries.get_all_capper_bets(user_inputted_capper_id)
 
     return render_template("capper/read.html", capper=user_inputted_capper_id, bets_with_cumulative_sum=bets_with_cumulative_sum, sport_results=by_sport_results)
 
