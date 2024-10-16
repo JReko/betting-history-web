@@ -36,18 +36,9 @@
         <div class="mb-3">
             <label for="sport" class="form-label">Sport/League</label>
             <select id="sport" name="sport" class="form-select" required>
-                <option value="hockey - NHL" {% if bet.sport == 'hockey - NHL' %}selected{% endif %}>hockey - NHL</option>
-                <option value="football - NFL" {% if bet.sport == 'football - NFL' %}selected{% endif %}>football - NFL</option>
-                <option value="football - NCAA" {% if bet.sport == 'football - NCAA' %}selected{% endif %}>football - NCAA</option>
-                <option value="baseball - MLB" {% if bet.sport == 'baseball - MLB' %}selected{% endif %}>baseball - MLB</option>
-                <option value="baseball - KBO" {% if bet.sport == 'baseball - KBO' %}selected{% endif %}>baseball - KBO</option>
-                <option value="tennis - ATP" {% if bet.sport == 'Tennis - ATP' %}selected{% endif %}>tennis - ATP</option>
-                <option value="tennis - WTA" {% if bet.sport == 'Tennis - WTA' %}selected{% endif %}>tennis - WTA</option>
-                <option value="mma - UFC" {% if bet.sport == 'mma - UFC' %}selected{% endif %}>mma - UFC</option>
-                <option value="soccer" {% if bet.sport == 'soccer' %}selected{% endif %}>soccer</option>
-                <option value="basketball - NBA" {% if bet.sport == 'basketball - NBA' %}selected{% endif %}>basketball - NBA</option>
-                <option value="basketball - NCAA" {% if bet.sport == 'basketball - NCAA' %}selected{% endif %}>basketball - NCAA</option>
-                <option value="basketball - Euroleague" {% if bet.sport == 'basketball - Euroleague' %}selected{% endif %}>basketball - Euroleague</option>
+                {% for league in sport_leagues %}
+                    <option value="{{ league.value }}" {% if bet.sport == league.value %}selected{% endif %}>{{ league.value }}</option>
+                {% endfor %}
             </select>
         </div>
 

@@ -123,3 +123,36 @@ class BetQueries:
         }).mappings().fetchall()
 
         return by_capper_results
+
+    @staticmethod
+    def get_settled_bets_by_month():
+        query = text("""
+                SELECT
+                    DATE_TRUNC('month', event_date AT TIME ZONE 'UTC' AT TIME ZONE :timezone) AS month,
+                    SUM(CASE WHEN status = 'Settled' THEN 1 ELSE 0 END) AS settled_bets_count,
+                    SUM(CASE WHEN status = 'Settled' AND result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
+                    SUM(CASE WHEN status = 'Settled' AND result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
+                    SUM(CASE WHEN status = 'Settled' AND result = 'Refunded' THEN 1 ELSE 0 END) AS refunded_bets_count,
+                    SUM(CASE 
+                            WHEN status = 'Settled' AND result = 'Win' THEN potential_win_amount
+                            WHEN status = 'Settled' AND result = 'Loss' THEN -stake_amount
+                            ELSE 0 
+                        END) AS profits,
+                    SUM(CASE 
+                            WHEN status = 'Settled' AND result != 'Refunded' THEN stake_amount
+                            ELSE 0 
+                        END) AS total_stake
+                FROM bets
+                WHERE 
+                    account_id = :account_id
+                    AND status = 'Settled'
+                GROUP BY DATE_TRUNC('month', event_date AT TIME ZONE 'UTC' AT TIME ZONE :timezone)
+                ORDER BY month ASC
+            """)
+
+        results = db.session.execute(query, {
+            'account_id': current_user.get_id(),
+            'timezone': current_user.get_timezone(),
+        }).mappings().fetchall()
+
+        return results

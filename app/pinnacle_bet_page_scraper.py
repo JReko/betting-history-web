@@ -1,8 +1,12 @@
 import re
 from bs4 import BeautifulSoup
 from datetime import datetime
+
+from flask import abort
+
 from app import db
 from app.bet_model import Bet
+from app.settings_model import Settings
 from app.utility_time_zone import UtilityTimeZone
 from flask_login import current_user
 
@@ -20,10 +24,14 @@ class PinnacleBetPageScraper:
 
         self.html_bets = html_bets
 
+        # Query to get sport league values directly as a flat list
+        self.sport_leagues = db.session.query(Settings.value).filter_by(name='sport_league').all()
+        self.sport_leagues = [result[0] for result in self.sport_leagues]
+
     def get_bet_count(self):
         return len(self.html_bets)
 
-    def import_bet(self):
+    def import_bet(self) -> {}:
         bet = self.html_bets.pop()
 
         # Bet number
@@ -89,9 +97,20 @@ class PinnacleBetPageScraper:
                 sport = f"{sport} - NBA"
             elif sport == "basketball" and "NCAA" in event_information_text.upper():
                 sport = f"{sport} - NCAA"
-            elif sport == "basketball" and "Euroleague" in event_information_text.upper():
+            elif sport == "basketball" and "EUROLEAGUE" in event_information_text.upper():
                 sport = f"{sport} - Euroleague"
+            elif sport == "basketball" and "EUROCUP" in event_information_text.upper():
+                sport = f"{sport} - Eurocup"
+            elif sport == "basketball" and "CBA" in event_information_text.upper():
+                sport = f"{sport} - CBA"
+            # MMA
+            elif sport == "mma" and "UFC" in event_information_text.upper():
+                sport = f"{sport} - UFC"
 
+        if sport not in self.sport_leagues:
+            if event_information_text is None:
+                return {'success': False, 'error': f"{bet_number_int} isn't fully de-collapsed"}
+            return {'success': False, 'error': f"Error: Unrecognized sport/league {sport} {event_information_text} {bet_number_int}"}
         # *** Stake & potential win amounts
         divs = bet.find_all('div', class_="flex-d3c12ab93880fc84f91a")
         spans = divs[1].find_all('span')
@@ -132,8 +151,7 @@ class PinnacleBetPageScraper:
         # Event date
         div = bet.find('div', class_="container-fe56b5332b47109891ef")
         if not div:
-            print(bet_number_int)
-            exit(1)
+            return {'success': False, 'Error': f"{bet_number_int} isn't fully de-collapsed"}
         spans = div.find_all('span')
         event_date_string = spans[2].get_text()
         event_date = datetime.strptime(event_date_string, "%a, %b %d, %Y, %H:%M")
@@ -208,6 +226,8 @@ class PinnacleBetPageScraper:
             "multi_bet_win_conditions": multi_bet_win_conditions,
             "capper": None,
         })
+
+        return {'success': True}
 
     @staticmethod
     def _store_or_update_bet(bet_data):

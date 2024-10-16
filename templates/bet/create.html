@@ -36,18 +36,9 @@
         <div class="mb-3">
             <label for="sport" class="form-label">Sport/League</label>
             <select id="sport" name="sport" class="form-select" required>
-                <option value="hockey - NHL">hockey - NHL</option>
-                <option value="football - NFL">football - NFL</option>
-                <option value="football - NCAA">football - NCAA</option>
-                <option value="baseball - MLB">baseball - MLB</option>
-                <option value="baseball - KBO">baseball - KBO</option>
-                <option value="tennis - ATP">tennis - ATP</option>
-                <option value="tennis - WTA">tennis - WTA</option>
-                <option value="mma - UFC">mma - UFC</option>
-                <option value="soccer">soccer</option>
-                <option value="basketball - NBA">basketball - NBA</option>
-                <option value="basketball - NCAA">basketball - NCAA</option>
-                <option value="basketball - Euroleague">basketball - Euroleague</option>
+                {% for league in sport_leagues %}
+                    <option value="{{ league.value }}">{{ league.value }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="mb-3">

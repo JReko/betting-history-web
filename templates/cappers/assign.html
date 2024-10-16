@@ -27,7 +27,7 @@
                     <td>{{ "%.2f"|format(bet.stake_amount) }}$</td>
                     <td>
                         <input type="hidden" name="bet_id" value="{{ bet.bet_id }}">
-                        <input type="text" name="capper" class="form-control" placeholder="Enter capper name" required autocomplete="off">
+                        <input type="text" name="capper" class="form-control" placeholder="Enter capper name" required>
                     </td>
                 </tr>
                 {% endfor %}

@@ -51,6 +51,9 @@ def create_app():
     from app.default.routes import default_bp
     app.register_blueprint(default_bp)
 
+    from app.settings.routes import settings_bp
+    app.register_blueprint(settings_bp)
+
     from app.auth.routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
@@ -76,6 +79,11 @@ def create_app():
             admin = True if current_user.email == "francis.caisse@gmail.com" else False
             return {'email': current_user.email, 'admin': admin}
         return {}
+
+    @app.context_processor
+    def inject_sport_leagues():
+        from app.settings_model import Settings
+        return {'sport_leagues': db.session.query(Settings).filter_by(name='sport_league').order_by(Settings.value.asc()).all()}
 
     # This function enforces that all routes, except those explicitly listed, require the user to be logged in.
     # It runs before every request, checking the user's authentication status and ensuring they are logged in.

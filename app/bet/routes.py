@@ -148,50 +148,17 @@ def bets_by_date(date_parameter: str):
 
 @bet_bp.route("/bets/overall")
 def bets_overall():
-    account_id = current_user.id  # Assuming user authentication/session is set up
 
-    # Query to get monthly stats for the current account
-    query = text("""
-        SELECT
-            DATE_TRUNC('month', event_date AT TIME ZONE 'UTC' AT TIME ZONE :timezone) AS month,  -- Convert to user timezone and group by month
-            SUM(CASE WHEN status = 'Settled' THEN 1 ELSE 0 END) AS settled_bets_count,
-            SUM(CASE WHEN status = 'Settled' AND result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
-            SUM(CASE WHEN status = 'Settled' AND result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
-            SUM(CASE WHEN status = 'Settled' AND result = 'Refunded' THEN 1 ELSE 0 END) AS refunded_bets_count,
-            SUM(CASE 
-                    WHEN status = 'Settled' AND result = 'Win' THEN potential_win_amount
-                    WHEN status = 'Settled' AND result = 'Loss' THEN -stake_amount
-                    ELSE 0 
-                END) AS profits,
-            SUM(CASE 
-                    WHEN status = 'Settled' AND result != 'Refunded' THEN stake_amount
-                    ELSE 0 
-                END) AS total_stake
-        FROM bets
-        WHERE 
-            account_id = :account_id
-            AND status = 'Settled'
-        GROUP BY DATE_TRUNC('month', event_date AT TIME ZONE 'UTC' AT TIME ZONE :timezone)
-        ORDER BY month ASC
-    """)
-
-    results = db.session.execute(query, {
-        'account_id': account_id,
-        'timezone': 'America/Montreal',
-    }).mappings().fetchall()
-
+    bets = BetQueries.get_settled_bets_by_month()
     # Initialize variables for overall and yearly profits
     total_profits = 0
     yearly_profits = {}
-
     # Loop over the results to calculate total and yearly profits
-    for row in results:
+    for row in bets:
         # Accumulate total profits
         total_profits += row['profits']
-
         # Extract the year from the 'month' field (it's a truncated timestamp)
         year = row['month'].year
-
         # Add profits to the respective year in the yearly_profits dictionary
         if year not in yearly_profits:
             yearly_profits[year] = 0
@@ -200,7 +167,7 @@ def bets_overall():
     # Pass results, total profits, and yearly profits to the template
     return render_template(
         'bets/overall.html',
-        stats=results,
+        stats=bets,
         total_profits=total_profits,
         yearly_profits=yearly_profits
     )
