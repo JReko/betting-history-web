@@ -77,8 +77,8 @@
                 >
                     <td>{{ loop.index }}</td>
                     <td>{{ bet.bet_id }}</td>
-                    <td>{{ bet.match }}</td>
-                    <td>{{ bet.pick }}</td>
+                    <td>{{ bet.match|truncate(40, True, '...') }}</td>
+                    <td>{{ bet.match|truncate(35, True, '...') }}</td>
                     <td>{{ "{:.2f}".format(bet.stake_amount) }}$</td>
                     <td>{{ "{:.2f}".format(bet.potential_win_amount) }}$</td>
                     <td>

@@ -3,6 +3,7 @@ from datetime import datetime
 from flask_login import current_user
 from sqlalchemy import text
 from app import db
+from app.bet_model import Bet
 from app.utility_time_zone import UtilityTimeZone
 
 
@@ -29,7 +30,6 @@ class BetQueries:
                 account_id = :account_id
                 AND event_date >= :start
                 AND event_date < :end
-                
         """)
 
         bets = db.session.execute(query, {
@@ -156,3 +156,23 @@ class BetQueries:
         }).mappings().fetchall()
 
         return results
+
+    @staticmethod
+    def get_bet_by_id(bet_id, user_timezone: str) -> Bet:
+        query = text("""
+                    SELECT
+                        *,
+                        event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone AS event_date_localized
+                    FROM bets
+                    WHERE
+                        bet_id = :id
+                        AND account_id = :account_id
+                """)
+
+        bet = db.session.execute(query, {
+            'account_id': current_user.get_id(),
+            'id': bet_id,
+            'user_timezone': user_timezone,
+        }).fetchone()
+
+        return bet

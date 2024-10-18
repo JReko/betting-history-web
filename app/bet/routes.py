@@ -1,13 +1,12 @@
+import pytz
 from flask import render_template, request, redirect, url_for, abort, Blueprint, flash
 from flask_login import current_user
-from sqlalchemy import text
 
 from app import db
 from app.bet_model import Bet
 from datetime import datetime, timedelta
 
 from app.bet_queries import BetQueries
-from app.pinnacle_bet_page_scraper import PinnacleBetPageScraper
 from app.service import Service
 from app.utility_time_zone import UtilityTimeZone
 
@@ -25,9 +24,12 @@ def bet_create():
             bet_id = Bet.get_next_bet99_id()
         capper = request.form.get("capper")
         amount = float(request.form.get("amount"))
+        # Convert date to UTC as early as possible in our stack
         event_date_string = request.form.get("event_date")
-        event_date = datetime.strptime(event_date_string, '%Y-%m-%dT%H:%M')
-        event_date_utc_string = UtilityTimeZone.convert_to_utc(event_date.strftime('%Y-%m-%d %H:%M:%S'))
+        event_date_datetime = datetime.strptime(event_date_string, UtilityTimeZone.get_form_input_date_format())
+        event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date_datetime, current_user.get_timezone())
+        event_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(event_date_datetime_localized)
+
         sport = request.form.get("sport")
         event_match = request.form.get("event_match")
         pick = request.form.get("pick")
@@ -44,7 +46,7 @@ def bet_create():
             stake_amount=amount,
             potential_win_amount=potential_win_amount,
             sport=sport,
-            event_date=event_date_utc_string,
+            event_date=event_date_datetime_utc,
             match=event_match,
             pick=pick,
             status=status,
@@ -65,12 +67,15 @@ def bet_create():
 @bet_bp.route("/bet/edit/<user_inputted_bet_id>", methods=["GET", "POST"])
 def bet_edit(user_inputted_bet_id):
     if request.method == "POST":
-        # Get form data
         bet_id = request.form.get("bet_id")
         book = request.form.get("book")
         capper = request.form.get("capper")
         amount = float(request.form.get("amount"))
-        event_date = request.form.get("event_date")
+        # Convert date to UTC as early as possible in our stack
+        event_date_string = request.form.get("event_date")
+        event_date_datetime = datetime.strptime(event_date_string, UtilityTimeZone.get_form_input_date_format())
+        event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date_datetime,current_user.get_timezone())
+        event_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(event_date_datetime_localized)
         sport = request.form.get("sport")
         event_match = request.form.get("event_match")
         pick = request.form.get("pick")
@@ -89,9 +94,7 @@ def bet_edit(user_inputted_bet_id):
         bet.match = event_match
         bet.sport = sport
         bet.pick = pick
-        event_date = datetime.strptime(event_date, '%Y-%m-%dT%H:%M')
-        event_date_utc_string = UtilityTimeZone.convert_to_utc(event_date.strftime('%Y-%m-%d %H:%M:%S'))
-        bet.event_date = event_date_utc_string
+        bet.event_date = event_date_datetime_utc
         bet.capper = capper
 
         db.session.commit()
@@ -99,10 +102,7 @@ def bet_edit(user_inputted_bet_id):
         return redirect(url_for('bet.todays_bets'))  # Redirect to the bets page
 
     elif request.method == "GET":
-        bet: Bet = Bet.query.get(user_inputted_bet_id)
-        bet.event_date = UtilityTimeZone.convert_utc_datetime_to_user_time_zone(bet.event_date)
-
-        # If no bet is found, return a 404 error
+        bet: Bet = BetQueries.get_bet_by_id(user_inputted_bet_id, current_user.get_timezone())
         if not bet:
             abort(404)
 
@@ -112,7 +112,8 @@ def bet_edit(user_inputted_bet_id):
 @bet_bp.route("/bets/today")
 def todays_bets():
     # Get today's date
-    today = datetime.now(UtilityTimeZone.get_user_timezone())
+    tz = pytz.timezone(current_user.get_timezone())
+    today = datetime.now(tz)
     today_str = today.strftime("%Y-%m-%d")
 
     return redirect(url_for('bet.bets_by_date', date_parameter=today_str))

@@ -38,7 +38,7 @@ This application is designed to help you track your bets and analyze your bettin
 
 - `heroku create betting-history-web`
 - `heroku addons:create heroku-postgresql:essential-0`
-- DATABASE_URL is automatically populated in the heroku environment
+- `DATABASE_URL` is automatically populated in the heroku environment
 - `heroku config:get DATABASE_URL` if you want to actually see it from your own eyes
 
 #### Migrate

@@ -17,7 +17,7 @@ def calendar_view(year, month):
     if month < 1 or month > 12:
         return "Invalid month", 400
 
-    local_tz = pytz.timezone('America/Montreal')
+    local_tz = pytz.timezone(current_user.get_timezone())
     utc = pytz.utc
 
     if month == 12:
@@ -41,7 +41,7 @@ def calendar_view(year, month):
     # Query for settled bets within the UTC range
     monthly_bets = Bet.query.filter(
         Bet.event_date >= start_of_the_month_utc,
-        Bet.event_date <= end_of_the_month_utc.strftime('%Y-%m-%d %H:%M:%S'),
+        Bet.event_date <= end_of_the_month_utc,
         Bet.status == 'Settled',
         Bet.account_id == current_user.get_id(),
     ).all()
