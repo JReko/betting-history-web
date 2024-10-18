@@ -60,7 +60,7 @@ class TestDateManipulations(unittest.TestCase):
     def test_convert_standard_time_to_utc(self):
         # Test case for Standard Time (EST: UTC-5) - January 1, 2024
         eastern = pytz.timezone('America/Montreal')
-        standard_time = eastern.localize(datetime(2024, 1, 1, 11, 0, 0))  # EST time
+        standard_time = eastern.localize(datetime(2024, 1, 1, 12, 0, 0))  # EST time
 
         # Convert to UTC
         utc_datetime = UtilityTimeZone.convert_datetime_to_utc(standard_time)
