@@ -55,7 +55,6 @@ This application is designed to help you track your bets and analyze your bettin
 - `heroku pg:backups:schedule DATABASE_URL --at '04:00 America/Montreal' --app betting-history-web`
 - `heroku pg:backups --app betting-history-web`
 
-
 #### Local to heroku
 - `docker exec -it bet_tracking_postgres pg_dump --no-acl --no-owner -U local_user -d betting_history_web > dump_now.sql`
 - `heroku pg:psql DATABASE_URL --app betting-history-web < dump_now.sql`

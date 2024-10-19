@@ -31,10 +31,10 @@ class Service:
                 "roi": roi
             }
 
-        # Sort cappers_output: prioritize cappers with 10+ settled bets first, then sort by ROI
+        # Sort cappers_output: sort by profits DESC
         sorted_cappers = sorted(
             cappers_output.items(),
-            key=lambda x: (x[1]['settled_bets_count'] < 10, -x[1]['profits'])
+            key=lambda x: (-x[1]['profits'])
         )
         sorted_cappers_output = dict(sorted_cappers)
 
@@ -55,18 +55,17 @@ class Service:
         settled_bets = [bet for bet in bets if bet.status == 'Settled']
         pending_bets = [bet for bet in bets if bet.status in ['Pending', 'Accepted']]
 
-        # Sort both groups by event date
+        # Sort both groups by event date, match/event, pick so that bets on the same event are grouped together
         settled_bets.sort(key=lambda settled_bet: (settled_bet.event_date, settled_bet.match, settled_bet.pick))
         pending_bets.sort(key=lambda pending_bet: (pending_bet.event_date, pending_bet.match, pending_bet.pick))
 
-        # Combine settled bets at the top, pending/accepted bets at the bottom
+        # Combine settled bets at the top, pending bets at the bottom
         sorted_bets = settled_bets + pending_bets
 
-        # Calculate statistics
-        num_pending = len(pending_bets)
-        total_stake_pending = sum(bet.stake_amount for bet in pending_bets)
+        pending_bets_count = len(pending_bets)
+        pending_bets_total_stake = sum(bet.stake_amount for bet in pending_bets)
 
-        return sorted_bets, num_pending, total_stake_pending, current_profit
+        return sorted_bets, pending_bets_count, pending_bets_total_stake, current_profit
 
     @staticmethod
     def calculate_potential_win_amount(stake: float, odds: int) -> float:

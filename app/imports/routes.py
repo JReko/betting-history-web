@@ -31,7 +31,9 @@ def import_pinnacle_bets():
         # Call your import function to process the file
         scraper = PinnacleBetPageScraper(filepath)
         for x in range(scraper.get_bet_count()):
-            scraper.import_bet()
+            result = scraper.import_bet()
+            if not result['success']:
+                raise Exception(result['error'])
 
         flash('Bets imported successfully!', 'success')
         return redirect(url_for('bet.todays_bets'))

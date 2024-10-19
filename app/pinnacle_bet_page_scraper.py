@@ -103,6 +103,8 @@ class PinnacleBetPageScraper:
                 sport = f"{sport} - Eurocup"
             elif sport == "basketball" and "CBA" in event_information_text.upper():
                 sport = f"{sport} - CBA"
+            elif sport == "basketball" and "KOREAN" in event_information_text.upper():
+                sport = f"{sport} - KBL"
             # MMA
             elif sport == "mma" and "UFC" in event_information_text.upper():
                 sport = f"{sport} - UFC"
@@ -110,7 +112,7 @@ class PinnacleBetPageScraper:
         if sport not in self.sport_leagues:
             if event_information_text is None:
                 return {'success': False, 'error': f"{bet_number_int} isn't fully de-collapsed"}
-            return {'success': False, 'error': f"Error: Unrecognized sport/league {sport} {event_information_text} {bet_number_int}"}
+            return {'success': False, 'error': f"Error: Unrecognized sport/league {sport} ===  {event_information_text} === {bet_number_int}"}
         # *** Stake & potential win amounts
         divs = bet.find_all('div', class_="flex-d3c12ab93880fc84f91a")
         spans = divs[1].find_all('span')
