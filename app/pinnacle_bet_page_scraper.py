@@ -108,6 +108,8 @@ class PinnacleBetPageScraper:
             # MMA
             elif sport == "mma" and "UFC" in event_information_text.upper():
                 sport = f"{sport} - UFC"
+            elif sport == "mma" and "PFL" in event_information_text.upper():
+                sport = f"{sport} - PFL"
 
         if sport not in self.sport_leagues:
             if event_information_text is None:
