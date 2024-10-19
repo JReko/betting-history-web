@@ -155,7 +155,6 @@ class PinnacleBetPageScraper:
         spans = div.find_all('span')
         event_date_string = spans[2].get_text()
         event_date = datetime.strptime(event_date_string, "%a, %b %d, %Y, %H:%M")
-        event_date_string = event_date.strftime("%Y-%m-%d %H:%M:%S")
 
         # *** Pick
         inner_div_value = bet.find('div', class_="selection-f74c036e4b0c085e1f7a")
@@ -181,33 +180,27 @@ class PinnacleBetPageScraper:
         # Bet isn't graded set so dates aren't displayed the expected way
         if "Accepted" in keyword:
             inner_div_value = bet.find('div', class_="container-b2088ffeb0b0be27602c inlineBlock-b86bd0c94db92e9a487a timeDisplays-d7748861ee464fc61a39")
-            date_accepted_string = inner_div_value.get_text()
             date_settled_string = None
         # Bet is graded set so let's do our thing
         else:
             date_divs = bet.find_all('div', class_="container-b2088ffeb0b0be27602c inlineBlock-b86bd0c94db92e9a487a timeDisplays-d7748861ee464fc61a39")
             date_settled_string = date_divs[0].get_text(strip=True)
-            date_accepted_string = date_divs[1].get_text(strip=True)
 
-        date_accepted = datetime.strptime(date_accepted_string, "%b %d, %Y, %I:%M %p")
-        date_accepted_string = date_accepted.strftime("%Y-%m-%d %H:%M:%S")
         if date_settled_string:
             date_settled = datetime.strptime(date_settled_string, "%b %d, %Y, %I:%M %p")
             date_settled = date_settled.replace(second=0)
-            date_settled_string = date_settled.strftime("%Y-%m-%d %H:%M:%S")
         else:
-            date_settled_string = None
+            date_settled = None
 
         if multi_bet:
             if status == "Settled":
-                event_date_string = date_settled_string
+                event_date = date_settled
             else:
                 event_date = datetime.now()
                 event_date = event_date.replace(second=0)
-                event_date_string = event_date.strftime("%Y-%m-%d %H:%M:%S")
 
-        event_date_string = UtilityTimeZone.convert_to_utc(event_date_string)
-        date_accepted_string = UtilityTimeZone.convert_to_utc(date_accepted_string)
+        event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date, current_user.get_timezone())
+        event_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(event_date_datetime_localized)
 
         self._store_or_update_bet({
             "bet_id": bet_number_int,
@@ -221,8 +214,7 @@ class PinnacleBetPageScraper:
             "multi_bet": multi_bet,
             "match": match,
             "pick": pick,
-            "date_accepted": date_accepted_string,
-            "event_date": event_date_string,
+            "event_date": event_date_datetime_utc,
             "multi_bet_win_conditions": multi_bet_win_conditions,
             "capper": None,
         })
@@ -250,7 +242,6 @@ class PinnacleBetPageScraper:
                 multi_bet=bet_data.get('multi_bet'),
                 match=bet_data.get('match'),
                 pick=bet_data.get('pick'),
-                date_accepted=bet_data.get('date_accepted'),
                 event_date=bet_data.get('event_date'),
                 account_id=current_user.get_id(),
             )
@@ -267,7 +258,6 @@ class PinnacleBetPageScraper:
             bet.multi_bet = bet_data.get('multi_bet', bet.multi_bet)
             bet.match = bet_data.get('match', bet.match)
             bet.pick = bet_data.get('pick', bet.pick)
-            bet.date_accepted = bet_data.get('date_accepted', bet.date_accepted)
             bet.event_date = bet_data.get('event_date', bet.event_date)
 
         db.session.commit()
