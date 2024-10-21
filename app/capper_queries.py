@@ -10,7 +10,7 @@ class CapperQueries:
         query = text("""
             SELECT
                 *,
-                event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone as event_date,
+                event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone as event_date
             FROM 
                 bets
             WHERE
