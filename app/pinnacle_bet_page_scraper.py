@@ -192,7 +192,7 @@ class PinnacleBetPageScraper:
 
         if date_settled_string:
             date_settled = datetime.strptime(date_settled_string, "%b %d, %Y, %I:%M %p")
-            date_settled = date_settled.replace(second=0)
+            date_settled = date_settled.replace(second=0, microsecond=0)
         else:
             date_settled = None
 
@@ -201,7 +201,7 @@ class PinnacleBetPageScraper:
                 event_date = date_settled
             else:
                 event_date = datetime.now()
-                event_date = event_date.replace(second=0)
+                event_date = event_date.replace(second=0, microsecond=0)
 
         event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date, current_user.get_timezone())
         event_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(event_date_datetime_localized)
