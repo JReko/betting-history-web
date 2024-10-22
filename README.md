@@ -62,3 +62,8 @@ This application is designed to help you track your bets and analyze your bettin
 
 #### Logs
 - `heroku logs --tail`
+
+### 8. ** Conventional commits **
+- From: https://www.conventionalcommits.org/en/v1.0.0/
+- Setup local (project): git hook to enforce them
+  - Using: https://github.com/tapsellorg/conventional-commits-git-hook
