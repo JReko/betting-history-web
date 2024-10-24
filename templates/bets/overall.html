@@ -4,8 +4,6 @@
 
 {% block content %}
 <div class="container my-4">
-    <h1 class="text-center mb-4">Bets Overview</h1>
-
     <!-- Overall Profits -->
     <div class="overall-profits card mb-4">
         <div class="card-header bg-light">
@@ -13,7 +11,13 @@
         </div>
         <div class="card-body text-center">
             <h3 class="font-weight-bold {% if total_profits < 0 %}text-danger{% else %}text-success{% endif %}">
-                {{ total_profits | round(2) }}$
+                {% if total_profits > 0 %}
+                    +{{ "%.2f"|format(total_profits) }}$
+                {% elif total_profits < 0 %}
+                    {{ "%.2f"|format(total_profits) }}$
+                {% else%}
+                    0.00$
+                {% endif %}
             </h3>
         </div>
     </div>
@@ -36,7 +40,15 @@
                         <tr>
                             <td>{{ year }}</td>
                             <td class="{% if profits < 0 %}text-danger{% else %}text-success{% endif %}">
-                                <strong>{{ profits | round(2) }}$</strong>
+                                <strong>
+                                    {% if total_profits > 0 %}
+                                    +{{ "%.2f"|format(total_profits) }}$
+                                    {% elif total_profits < 0 %}
+                                    {{ "%.2f"|format(total_profits) }}$
+                                    {% else%}
+                                        0.00$
+                                    {% endif %}
+                                </strong>
                             </td>
                         </tr>
                     {% endfor %}
@@ -71,7 +83,15 @@
                             <td>{{ stat['losing_bets_count'] }}</td>
                             <td>{{ stat['refunded_bets_count'] }}</td>
                             <td class="{% if stat['profits'] < 0 %}text-danger{% else %}text-success{% endif %}">
-                                <strong>{{ stat['profits'] | round(2) }}$</strong>
+                                <strong>
+                                {% if stat['profits'] > 0 %}
+                                    +{{ "%.2f"|format(stat['profits']) }}$
+                                    {% elif stat['profits'] < 0 %}
+                                    {{ "%.2f"|format(stat['profits']) }}$
+                                    {% else%}
+                                        0.00$
+                                    {% endif %}
+                                </strong>
                             </td>
                         </tr>
                     {% endfor %}

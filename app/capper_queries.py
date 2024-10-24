@@ -44,17 +44,17 @@ class CapperQueries:
             SELECT
                 sport,
                 COUNT(*) AS total_bets_count,
-                SUM(CASE WHEN status = 'Settled' THEN 1 ELSE 0 END) AS settled_bets_count,
-                SUM(CASE WHEN status = 'Settled' AND result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
-                SUM(CASE WHEN status = 'Settled' AND result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
-                SUM(CASE WHEN status = 'Settled' AND result = 'Refunded' THEN 1 ELSE 0 END) AS refunded_bets_count,
+                SUM(CASE WHEN result IS NOT NULL THEN 1 ELSE 0 END) AS settled_bets_count,
+                SUM(CASE WHEN result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
+                SUM(CASE WHEN result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
+                SUM(CASE WHEN result = 'Refunded' THEN 1 ELSE 0 END) AS refunded_bets_count,
                 SUM(CASE 
-                        WHEN status = 'Settled' AND result = 'Win' THEN potential_win_amount
-                        WHEN status = 'Settled' AND result = 'Loss' THEN -stake_amount
+                        WHEN result = 'Win' THEN potential_win_amount
+                        WHEN result = 'Loss' THEN -stake_amount
                         ELSE 0 
                     END) AS profits,
                 SUM(CASE 
-                        WHEN status = 'Settled' AND result != 'Refunded' THEN stake_amount
+                        WHEN result != 'Refunded' THEN stake_amount
                         ELSE 0 
                     END) AS total_stake
             FROM 
@@ -84,17 +84,17 @@ class CapperQueries:
             SELECT
                 sport,
                 COUNT(*) AS total_bets_count,
-                SUM(CASE WHEN status = 'Settled' THEN 1 ELSE 0 END) AS settled_bets_count,
-                SUM(CASE WHEN status = 'Settled' AND result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
-                SUM(CASE WHEN status = 'Settled' AND result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
-                SUM(CASE WHEN status = 'Settled' AND result = 'Refunded' THEN 1 ELSE 0 END) AS refunded_bets_count,
+                SUM(CASE WHEN result IS NOT NULL THEN 1 ELSE 0 END) AS settled_bets_count,
+                SUM(CASE WHEN result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
+                SUM(CASE WHEN result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
+                SUM(CASE WHEN result = 'Refunded' THEN 1 ELSE 0 END) AS refunded_bets_count,
                 SUM(CASE 
-                        WHEN status = 'Settled' AND result = 'Win' THEN potential_win_amount
-                        WHEN status = 'Settled' AND result = 'Loss' THEN -stake_amount
+                        WHEN result = 'Win' THEN potential_win_amount
+                        WHEN result = 'Loss' THEN -stake_amount
                         ELSE 0 
                     END) AS profits,
                 SUM(CASE 
-                        WHEN status = 'Settled' AND result != 'Refunded' THEN stake_amount
+                        WHEN result != 'Refunded' THEN stake_amount
                         ELSE 0 
                     END) AS total_stake
             FROM 
@@ -118,5 +118,37 @@ class CapperQueries:
         }).mappings().fetchall()
 
         return by_sport_results
+
+    @staticmethod
+    def get_all_cappers_bets_by_capper():
+        query = text("""
+            SELECT
+                capper,
+                COUNT(bet_id) AS bets_count,
+                SUM(CASE WHEN result IS NOT NULL THEN 1 ELSE 0 END) AS settled_bets_count,
+                SUM(CASE WHEN result IS NULL THEN 1 ELSE 0 END) AS pending_bets_count,
+                SUM(CASE WHEN result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
+                SUM(CASE WHEN result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
+                SUM(CASE WHEN result = 'Refunded' THEN 1 ELSE 0 END) AS refunded_bets_count,
+                SUM(CASE 
+                        WHEN result = 'Win' THEN potential_win_amount
+                        WHEN result = 'Loss' THEN -stake_amount
+                        ELSE 0 
+                    END) AS profits,
+                SUM(CASE 
+                        WHEN result != 'Refunded' THEN stake_amount
+                        ELSE 0 
+                    END) AS total_stake
+            FROM 
+                bets
+            WHERE 
+                capper IS NOT NULL
+                AND account_id = :account_id
+            GROUP BY
+                capper
+            """)
+
+        # Execute the raw SQL query
+        return db.session.execute(query, {"account_id": current_user.get_id()}).fetchall()
 
 

@@ -99,7 +99,7 @@ def bet_edit(user_inputted_bet_id):
 
         db.session.commit()
 
-        return redirect(url_for('bet.todays_bets'))  # Redirect to the bets page
+        return redirect(url_for('bet.bets_by_date', date_parameter=event_date_datetime_localized.strftime("%Y-%m-%d")))  # Redirect to the bets page
 
     elif request.method == "GET":
         bet: Bet = BetQueries.get_bet_by_id(user_inputted_bet_id, current_user.get_timezone())

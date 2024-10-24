@@ -42,7 +42,7 @@ def calendar_view(year, month):
     monthly_bets = Bet.query.filter(
         Bet.event_date >= start_of_the_month_utc,
         Bet.event_date <= end_of_the_month_utc,
-        Bet.status == 'Settled',
+        Bet.result is not None,
         Bet.account_id == current_user.get_id(),
     ).all()
 
@@ -83,8 +83,7 @@ def calendar_view(year, month):
 
 @calendar_bp.route("/calendar")
 def calendar_today():
-    # Get the current year and month in the local timezone
-    local_tz = pytz.timezone('America/Montreal')
+    local_tz = pytz.timezone(current_user.get_timezone())
     today = datetime.now(local_tz)
 
     # Redirect to the /calendar/<int:year>/<int:month> route

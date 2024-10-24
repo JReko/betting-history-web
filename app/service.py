@@ -52,8 +52,8 @@ class Service:
                 current_profit -= bet.stake_amount
 
         # Separate settled and pending/accepted bets
-        settled_bets = [bet for bet in bets if bet.status == 'Settled']
-        pending_bets = [bet for bet in bets if bet.status in ['Pending', 'Accepted']]
+        settled_bets = [bet for bet in bets if bet.result is not None]
+        pending_bets = [bet for bet in bets if bet.result is None]
 
         # Sort both groups by event date, match/event, pick so that bets on the same event are grouped together
         settled_bets.sort(key=lambda settled_bet: (settled_bet.event_date, settled_bet.match, settled_bet.pick))

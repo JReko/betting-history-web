@@ -58,42 +58,10 @@ def capper_read(user_inputted_capper_id: str):
 
 @capper_bp.route("/cappers", methods=["GET"])
 def cappers_read():
-    account_id = current_user.get_id()
+    bets_by_capper = CapperQueries.get_all_cappers_bets_by_capper()
 
-    # Raw SQL query to get all necessary capper stats in one query
-    query = text("""
-    SELECT
-        capper,
-        COUNT(bet_id) AS bets_count,
-        SUM(CASE WHEN status = 'Settled' THEN 1 ELSE 0 END) AS settled_bets_count,
-        SUM(CASE WHEN status = 'Settled' AND result = 'Win' THEN 1 ELSE 0 END) AS winning_bets_count,
-        SUM(CASE WHEN status = 'Settled' AND result = 'Loss' THEN 1 ELSE 0 END) AS losing_bets_count,
-        SUM(CASE WHEN status = 'Settled' AND result = 'Refunded' THEN 1 ELSE 0 END) AS refunded_bets_count,
-        SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_bets_count,
-        SUM(CASE 
-                WHEN status = 'Settled' AND result = 'Win' THEN potential_win_amount
-                WHEN status = 'Settled' AND result = 'Loss' THEN -stake_amount
-                ELSE 0 
-            END) AS profits,
-        SUM(CASE 
-                WHEN status = 'Settled' AND result != 'Refunded' THEN stake_amount
-                ELSE 0 
-            END) AS total_stake
-    FROM 
-        bets
-    WHERE 
-        capper IS NOT NULL
-        AND account_id = :account_id
-    GROUP BY
-        capper
-    """)
-
-    # Execute the raw SQL query
-    result = db.session.execute(query, {"account_id": account_id}).fetchall()
-
-    # Process the results and prepare output
     cappers_output = {}
-    for row in result:
+    for row in bets_by_capper:
         capper_id = row.capper
         roi = (row.profits / row.total_stake) * 100 if row.total_stake != 0 else 0.00
         bet_count_error = row.settled_bets_count != (row.winning_bets_count + row.losing_bets_count + row.refunded_bets_count)

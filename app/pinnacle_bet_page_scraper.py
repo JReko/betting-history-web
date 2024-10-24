@@ -20,7 +20,7 @@ class PinnacleBetPageScraper:
 
         soup = BeautifulSoup(html_content, 'html.parser')
 
-        html_bets = soup.find_all('div', class_='card-c719350a6bf213a150d8 row-ac7df9e621c3e0c7844e')
+        html_bets = soup.find_all('div', {'class': '', 'data-test-id': 'BetResultsTable-BetCard-Details-Wrapper'})
 
         self.html_bets = html_bets
 
@@ -35,12 +35,13 @@ class PinnacleBetPageScraper:
         bet = self.html_bets.pop()
 
         # Bet number
-        inner_div_bet_number = bet.find('div', class_='container-b2088ffeb0b0be27602c inlineBlock-b86bd0c94db92e9a487a inline-fc9adfd7f40b68777249')
-        bet_number_string = inner_div_bet_number.get_text(strip=True)
-        bet_number_int = bet_number_string.replace('#', '')
+        inner_div_bet_number = bet.find('div', class_='dataPoint-KuKWdXUdiS betId-PSO7kpwKIQ')
+        # Format should be: Bet no.#2020077384
+        unprocessed_bet_number_string = inner_div_bet_number.get_text(strip=True)
+        processed_bet_number_string = unprocessed_bet_number_string.replace('Bet no.#', '')
 
         # Status & result
-        inner_div_status = bet.find('div', class_='betStatus-a120999df239ea8debbf')
+        inner_div_status = bet.find('div', class_='dataPoint-KuKWdXUdiS betStatusWrapper-ixgXdz7obf')
         spans_result = inner_div_status.find_all('span')
         status = spans_result[0].get_text(strip=True)
         status = "Pending" if status == "Accepted" else status
@@ -64,13 +65,13 @@ class PinnacleBetPageScraper:
             multi_bet = True
 
         # 1st - sport
-        i = bet.find('i', class_='sportIcon-f1f1ca0e1862406d601d')
+        i_element = bet.find('i', class_=re.compile(r'^sportIcon-'))
         sport = 'n/a'
-        if i:
-            sport = i['class'][0].replace('icon-', '')
+        if i_element:
+            sport = i_element['class'][0].replace('icon-', '')
 
         # Event information
-        div = bet.find('div', class_='descLabel-cff62e4d8b43253a2856 marketLeague-ae76eaa0da8b52c27a31')
+        div = bet.find('div', class_=re.compile(r'^marketLeague-'))
         event_information_text = None
         if div:
             event_information_text = div.get_text()
@@ -113,37 +114,65 @@ class PinnacleBetPageScraper:
 
         if sport not in self.sport_leagues:
             if event_information_text is None:
-                return {'success': False, 'error': f"{bet_number_int} isn't fully de-collapsed"}
-            return {'success': False, 'error': f"Error: Unrecognized sport/league {sport} ===  {event_information_text} === {bet_number_int}"}
+                return {'success': False, 'error': f"{processed_bet_number_string} isn't fully de-collapsed"}
+            return {'success': False, 'error': f"Error: Unrecognized sport/league {sport} ===  {event_information_text} === {processed_bet_number_string}"}
+
         # *** Stake & potential win amounts
-        divs = bet.find_all('div', class_="flex-d3c12ab93880fc84f91a")
-        spans = divs[1].find_all('span')
-        stake_amount = float(spans[1].get_text(strip=True))
-        potential_win_amount = float(spans[3].get_text(strip=True))
+        div = bet.find('div', class_="rightAlignment-aAUDqtTzac")
+        spans = div.find_all('span')
+
+        if status == "Pending":
+            # 0 = {Tag} <span>Bet no.</span>
+            # 1 = {Tag} <span>Pending</span>
+            # 2 = {Tag} <span>Stake:</span>
+            # 3 = {Tag} <span>30.00</span>
+            # 4 = {Tag} <span>Win:</span>
+            # 5 = {Tag} <span>37.01</span>
+            # 6 = {Tag} <span>Payout:</span>
+            # 7 = {Tag} <span>67.01</span>
+            stake_amount = float(spans[3].get_text(strip=True))
+            potential_win_amount = float(spans[5].get_text(strip=True))
+        elif status == "Settled":
+            # 00 = {Tag} <span>Bet no.</span>
+            # 01 = {Tag} <span>Settled</span>
+            # 02 = {Tag} <span class="separator-GARCq8ihwt"> – </span>
+            # 03 = {Tag} <span>Win</span>
+            # 04 = {Tag} <span>Accepted:</span>
+            # 05 = {Tag} <span>Oct 23, 2024, 6:28 PM</span>
+            # 06 = {Tag} <span>Stake:</span>
+            # 07 = {Tag} <span>15.00</span>
+            # 08 = {Tag} <span>Win:</span>
+            # 09 = {Tag} <span>15.53</span>
+            # 10 = {Tag} <span>Payout:</span>
+            # 11 = {Tag} <span>30.53</span>
+            stake_amount = float(spans[7].get_text(strip=True))
+            potential_win_amount = float(spans[9].get_text(strip=True))
 
         # *** line
-        inner_div_value = bet.find('div', class_="container-b2088ffeb0b0be27602c inlineBlock-b86bd0c94db92e9a487a value-d122dd629b9130210a8d")
-        line = inner_div_value.get_text().replace('@', '').replace('+', '').strip()
+        div = bet.find('div', class_=re.compile(r'^odds-'))
+        line = div.get_text().replace('@', '').replace('+', '').strip()
 
         # *** match
-        inner_div_value = bet.find('div', class_="matchName-f62aab4c515282e6d47b")
+        inner_div_value = bet.find('div', class_=re.compile(r'^matchName-'))
 
         multi_bet_win_conditions = []
         if multi_bet:
-            full_parlay_odds = bet.find('div', class_="participantOdds-aac8d8d5ef636ff14620").get_text()
-            divs = bet.find_all('div', class_="contentRow-b2127c7d34f9f71ef4e0 multiGroup-e4a2bbdf87c83b29d373")
-            legs = len(divs)
-            for div in divs:
-                match = div.find('div', class_="matchName-f62aab4c515282e6d47b").get_text(strip=True)
-                pick = div.find('div', class_="selection-f74c036e4b0c085e1f7a").get_text(strip=True)
+            full_parlay_odds = line
+            matches = bet.find_all('div', class_=re.compile(r'^matchName-'))
+            picks = bet.find_all('div', class_=re.compile(r'^selection-'))
+            legs = len(matches)
+            for i in range(legs):
+                match = matches[i].get_text(strip=True)
+                pick = picks[i].get_text(strip=True)
                 multi_bet_win_conditions.append({
                     "match": match,
                     "pick": pick,
                     "legs": legs,
                     "odds": full_parlay_odds,
                 })
-            match = 'Parlay'
+            match = f'{legs} legs parlay'
         else:
+            inner_div_value = bet.find('div', class_=re.compile(r'^matchName-'))
             match = (inner_div_value.get_text()
                      .replace('(Sets)', '')
                      .replace('(Games)', '')
@@ -153,15 +182,26 @@ class PinnacleBetPageScraper:
                      .strip())
 
         # Event date
-        div = bet.find('div', class_="container-fe56b5332b47109891ef")
-        if not div:
-            return {'success': False, 'Error': f"{bet_number_int} isn't fully de-collapsed"}
-        spans = div.find_all('span')
-        event_date_string = spans[2].get_text()
-        event_date = datetime.strptime(event_date_string, "%a, %b %d, %Y, %H:%M")
+        event_date_datetime = None
+        if multi_bet:
+            divs = bet.find_all('div', class_="container-_la1MytHEJ")
+            for div in divs:
+                spans = div.find_all('span')
+                event_date_string = spans[2].get_text()
+                event_date_datetime_tmp = datetime.strptime(event_date_string, "%a, %b %d, %Y, %H:%M")
+                if event_date_datetime is None:
+                    event_date_datetime = event_date_datetime_tmp
+                elif event_date_datetime_tmp < event_date_datetime:
+                    event_date_datetime = event_date_datetime_tmp
+        else:
+            div = bet.find('div', class_="container-_la1MytHEJ")
+            if not div:
+                return {'success': False, 'error': f"{processed_bet_number_string} isn't fully de-collapsed"}
+            spans = div.find_all('span')
+            event_date_string = spans[2].get_text()
+            event_date_datetime = datetime.strptime(event_date_string, "%a, %b %d, %Y, %H:%M")
 
         # *** Pick
-        inner_div_value = bet.find('div', class_="selection-f74c036e4b0c085e1f7a")
         pick = ""
         if multi_bet:
             for leg in multi_bet_win_conditions:
@@ -171,43 +211,18 @@ class PinnacleBetPageScraper:
             # Pick at this step should have a trailing " + "
             pick = pick.rstrip(' + ')
         else:
-            pick = inner_div_value.get_text().replace('(Sets) (Sets)', '(Sets)').replace('(Games) (Games)', '(Games)').strip()
+            pick_div = bet.find('div', class_=re.compile(r'^selection-'))
+            pick = pick_div.get_text().replace('(Sets) (Sets)', '(Sets)').replace('(Games) (Games)', '(Games)').strip()
 
         # 1st Half bets
         if event_information_text and "1ST H" in event_information_text.upper():
             pick = f"{pick} - 1H"
 
-        # *** Accepted and Settled dates
-        inner_div_value = bet.find('div', class_="container-ff6d881f7592bf85eb4d inline-f3de3c46c55dfbeac4d8")
-        keyword = inner_div_value.get_text()
-
-        # Bet isn't graded set so dates aren't displayed the expected way
-        if "Accepted" in keyword:
-            inner_div_value = bet.find('div', class_="container-b2088ffeb0b0be27602c inlineBlock-b86bd0c94db92e9a487a timeDisplays-d7748861ee464fc61a39")
-            date_settled_string = None
-        # Bet is graded set so let's do our thing
-        else:
-            date_divs = bet.find_all('div', class_="container-b2088ffeb0b0be27602c inlineBlock-b86bd0c94db92e9a487a timeDisplays-d7748861ee464fc61a39")
-            date_settled_string = date_divs[0].get_text(strip=True)
-
-        if date_settled_string:
-            date_settled = datetime.strptime(date_settled_string, "%b %d, %Y, %I:%M %p")
-            date_settled = date_settled.replace(second=0, microsecond=0)
-        else:
-            date_settled = None
-
-        if multi_bet:
-            if status == "Settled":
-                event_date = date_settled
-            else:
-                event_date = datetime.now()
-                event_date = event_date.replace(second=0, microsecond=0)
-
-        event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date, current_user.get_timezone())
+        event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date_datetime, current_user.get_timezone())
         event_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(event_date_datetime_localized)
 
         self._store_or_update_bet({
-            "bet_id": bet_number_int,
+            "bet_id": processed_bet_number_string,
             "book": "pinnacle",
             "sport": sport,
             "status": status,

@@ -42,7 +42,6 @@
     <thead>
         <tr>
             <th style="">#</th>
-            <th style="">Status</th>
             <th style="">Book</th>
             <th style="">Sport</th>
             <th style="">Event/Match</th>
@@ -56,12 +55,11 @@
     </thead>
     <tbody>
         {% for bet in bets %}
-        <tr {% if bet.status == 'Settled' and bet.result == 'Win' %}class="bg-win"{% endif %}
-            {% if bet.status == 'Settled' and bet.result == 'Loss' %}class="bg-loss"{% endif %}
-            {% if bet.status == 'Settled' and bet.result in ['Voided', 'Refunded', 'Push'] %}class="bg-void"{% endif %}
+        <tr {% if bet.result == 'Win' %}class="bg-win"{% endif %}
+            {% if bet.result == 'Loss' %}class="bg-loss"{% endif %}
+            {% if bet.result == 'Refunded' %}class="bg-void"{% endif %}
             >
             <td><a href="/bet/edit/{{ bet.bet_id }}">{{ loop.index }}</a></td>
-            <td>{{ bet.status }}</td>
             <td>{{ bet.book }}</td>
             <td>{{ bet.sport | default('', true) }}</td>
             <td>{{ bet.match|truncate(40, True, '...') }}</td>
