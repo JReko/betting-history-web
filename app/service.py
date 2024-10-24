@@ -46,9 +46,9 @@ class Service:
 
         current_profit = 0
         for bet in bets:
-            if bet.status == "Settled" and bet.result == "Win":
+            if bet.result == "Win":
                 current_profit += bet.potential_win_amount
-            elif bet.status == "Settled" and bet.result == "Loss":
+            elif bet.result == "Loss":
                 current_profit -= bet.stake_amount
 
         # Separate settled and pending/accepted bets
