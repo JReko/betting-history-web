@@ -147,7 +147,6 @@ class BetQueries:
                 FROM bets
                 WHERE 
                     account_id = :account_id
-                    AND status = 'Settled'
                 GROUP BY DATE_TRUNC('month', event_date AT TIME ZONE 'UTC' AT TIME ZONE :timezone)
                 ORDER BY month ASC
             """)
