@@ -37,28 +37,3 @@ def import_pinnacle_bets():
 
         flash('Bets imported successfully!', 'success')
         return redirect(url_for('bet.todays_bets'))
-
-
-@import_bp.route("/bet/auto_import_pinnacle_bets", methods=["GET", "POST"])
-def auto_import_pinnacle_bets():
-    if request.method == "GET":
-
-        # Define the path to the file you want to upload automatically
-        predefined_file_path = '/Users/franciscaisse/Downloads/p.htm'
-
-        # Check if the file exists at the specified location
-        if not os.path.exists(predefined_file_path):
-            abort(400)
-
-        # Use the predefined file path to proceed with the upload
-        try:
-            scraper = PinnacleBetPageScraper(predefined_file_path)
-            for x in range(scraper.get_bet_count()):
-                result = scraper.import_bet()
-                if not result['success']:
-                    raise Exception(result['error'])
-
-            flash('Bets imported successfully!', 'success')
-            return redirect(url_for('bet.todays_bets'))
-        except Exception as exception_message:
-            abort(400, exception_message)
