@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Capper results{% endblock %}
+
+{% block content %}
+<table class="table table-bordered table-sm table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Capper</th>
+            <th>Lifetime Returns</th>
+            <th>Lifetime Bet Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in cappers %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td><a href="/sportsline/capper/{{ row.capper }}">{{ row.capper }}</a></td>
+            <td class="{% if row.returns < 0 %}text-danger{% else %}text-success{% endif %}">
+                <strong>
+                {% if row.returns > 0 %}
+                    +{{ "%.2f"|format(row.returns) }} units
+                    {% elif row.returns < 0 %}
+                    {{ "%.2f"|format(row.returns) }} units
+                    {% else%}
+                        0 units
+                    {% endif %}
+                </strong>
+            </td>
+            <td>{{ row.bet_count}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}Capper results{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Overall Profits -->
+    <div class="overall-profits card mb-4">
+        <div class="card-header bg-light">
+            <h2 class="mb-0 text-dark">{{ capper }}</h2>
+        </div>
+        <div class="card-body text-center">
+             <h3 class="font-weight-bold {% if capper_lifetime_returns.returns < 0 %}text-danger{% else %}text-success{% endif %}">
+                {% if capper_lifetime_returns.returns > 0 %}
+                    +{{ "%.2f"|format(capper_lifetime_returns.returns) }} units
+                {% elif capper_lifetime_returns.returns < 0 %}
+                    {{ "%.2f"|format(capper_lifetime_returns.returns) }} units
+                {% else%}
+                    0.00$
+                {% endif %}
+            </h3>
+            <h4>
+                {{ capper_lifetime_returns.roi }}% ROI
+            </h4>
+        </div>
+    </div>
+
+    <!-- Yearly -->
+    <div class="yearly card mb-4">
+        <div class="card-header bg-light">
+            <h2 class="mb-0 text-dark">By year stats</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Year</th>
+                        <th>Returns</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Pushes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in capper_yearly_returns %}
+                        <tr>
+                            <td>{{ row.year }}</td>
+                            <td class="{% if row.returns < 0 %}text-danger{% else %}text-success{% endif %}">
+                                <strong>
+                                {% if row.returns > 0 %}
+                                    +{{ "%.2f"|format(row.returns) }} units
+                                    {% elif row.returns < 0 %}
+                                    {{ "%.2f"|format(row.returns) }} units
+                                    {% else%}
+                                        0 units
+                                    {% endif %}
+                                </strong>
+                            </td>
+                            <td>{{ row.win_count }}</td>
+                            <td>{{ row.loss_count }}</td>
+                            <td>{{ row.push_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- By sport -->
+    <div class="by-sport card mb-4">
+        <div class="card-header bg-light">
+            <h2 class="mb-0 text-dark">By sport stats</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>League</th>
+                        <th>Returns</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Pushes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in capper_returns_by_sport %}
+                        <tr>
+                            <td>{{ row.league }}</td>
+                            <td class="{% if row.returns < 0 %}text-danger{% else %}text-success{% endif %}">
+                                <strong>
+                                {% if row.returns > 0 %}
+                                    +{{ "%.2f"|format(row.returns) }} units
+                                    {% elif row.returns < 0 %}
+                                    {{ "%.2f"|format(row.returns) }} units
+                                    {% else%}
+                                        0 units
+                                    {% endif %}
+                                </strong>
+                            </td>
+                            <td>{{ row.win_count }}</td>
+                            <td>{{ row.loss_count }}</td>
+                            <td>{{ row.push_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Yearly by sport -->
+    <div class="yearly-by-sport card mb-4">
+        <div class="card-header bg-light">
+            <h2 class="mb-0 text-dark">Yearly stats by sport</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Year</th>
+                        <th>League</th>
+                        <th>Returns</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Pushes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in capper_yearly_returns_by_sport %}
+                        <tr>
+                            <td>{{ row.year }}</td>
+                            <td>{{ row.league }}</td>
+                            <td class="{% if row.returns < 0 %}text-danger{% else %}text-success{% endif %}">
+                                <strong>
+                                {% if row.returns > 0 %}
+                                    +{{ "%.2f"|format(row.returns) }} units
+                                    {% elif row.returns < 0 %}
+                                    {{ "%.2f"|format(row.returns) }} units
+                                    {% else%}
+                                        0 units
+                                    {% endif %}
+                                </strong>
+                            </td>
+                            <td>{{ row.win_count }}</td>
+                            <td>{{ row.loss_count }}</td>
+                            <td>{{ row.push_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- By market -->
+    <div class="yearly card mb-4">
+        <div class="card-header bg-light">
+            <h2 class="mb-0 text-dark">Yearly stats by sport & market</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Year</th>
+                        <th>League</th>
+                        <th>Market</th>
+                        <th>Returns</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Pushes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in capper_returns_by_market %}
+                        <tr>
+                            <td>{{ row.year }}</td>
+                            <td>{{ row.league }}</td>
+                            <td>{{ row.market }}</td>
+                            <td class="{% if row.returns < 0 %}text-danger{% else %}text-success{% endif %}">
+                                <strong>
+                                {% if row.returns > 0 %}
+                                    +{{ "%.2f"|format(row.returns) }} units
+                                    {% elif row.returns < 0 %}
+                                    {{ "%.2f"|format(row.returns) }} units
+                                    {% else%}
+                                        0 units
+                                    {% endif %}
+                                </strong>
+                            </td>
+                            <td>{{ row.win_count }}</td>
+                            <td>{{ row.loss_count }}</td>
+                            <td>{{ row.push_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

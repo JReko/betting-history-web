@@ -63,7 +63,6 @@
                     <th style="width: 6%;">Stake</th>
                     <th style="width: 6%;">To Win</th>
                     <th style="width: 6%;">Line</th>
-                    <th style="width: 8%;">Line</th>
                     <th style="width: 8%;">Result</th>
                     <th>Event Date</th>
                     <th style="width: 8%;">Profit Cum.</th>
@@ -71,9 +70,9 @@
             </thead>
             <tbody>
                 {% for bet, cum_sum in bets_with_cumulative_sum %}
-                <tr {% if bet.status == 'Settled' and bet.result == 'Win' %}class="bg-win"{% endif %}
-                    {% if bet.status == 'Settled' and bet.result == 'Loss' %}class="bg-loss"{% endif %}
-                    {% if bet.status == 'Settled' and bet.result in ['Voided', 'Refunded', 'Push'] %}class="bg-void"{% endif %}
+                <tr {% if bet.result == 'Win' %}class="bg-win"{% endif %}
+                    {% if bet.result == 'Loss' %}class="bg-loss"{% endif %}
+                    {% if bet.result in ['Voided', 'Refunded', 'Push'] %}class="bg-void"{% endif %}
                 >
                     <td>{{ loop.index }}</td>
                     <td>{{ bet.bet_id }}</td>
@@ -88,7 +87,6 @@
                             {{ bet.line }}
                         {% endif %}
                     </td>
-                    <td>{{ bet.status }}</td>
                     <td>{{ bet.result or 'Pending' }}</td>
                     <td>{{ bet.event_date }}</td>
                     <td>{{ "%.2f"|format(cum_sum) }}$</td>

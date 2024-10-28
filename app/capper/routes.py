@@ -1,16 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort
-from flask_login import current_user
-from sqlalchemy import func, text
-
+from flask import Blueprint, render_template, request, redirect, url_for
 from app import db
 from app.bet_model import Bet
-from app.capper_model import Capper
 from app.capper_queries import CapperQueries
 
 capper_bp = Blueprint('capper', __name__)
 
 
-# Registration Route
 @capper_bp.route('/cappers/assign', methods=['GET', 'POST'])
 def assign_cappers():
     if request.method == 'POST':
@@ -41,12 +36,12 @@ def capper_read(user_inputted_capper_id: str):
     current_sum = 0.0
 
     for bet in bets:
-        if bet.status == 'Settled':
+        if bet.result in ['Win', 'Loss', 'Refunded']:
             if bet.result == 'Win':
                 current_sum += bet.potential_win_amount
             elif bet.result == 'Loss':
                 current_sum -= bet.stake_amount
-        cumulative_sum.append(current_sum)
+            cumulative_sum.append(current_sum)
 
     # Combine bets and cumulative_sum into a list of tuples
     bets_with_cumulative_sum = list(zip(bets, cumulative_sum))

@@ -42,9 +42,9 @@
                             <td class="{% if profits < 0 %}text-danger{% else %}text-success{% endif %}">
                                 <strong>
                                     {% if total_profits > 0 %}
-                                    +{{ "%.2f"|format(total_profits) }}$
+                                    +{{ "%.2f"|format(profits) }}$
                                     {% elif total_profits < 0 %}
-                                    {{ "%.2f"|format(total_profits) }}$
+                                    {{ "%.2f"|format(profits) }}$
                                     {% else%}
                                         0.00$
                                     {% endif %}
