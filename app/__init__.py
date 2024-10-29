@@ -72,6 +72,9 @@ def create_app():
     from app.sportsline.routes import sportsline_bp
     app.register_blueprint(sportsline_bp)
 
+    from app.report.routes import report_bp
+    app.register_blueprint(report_bp)
+
     @app.context_processor
     def inject_user():
         # Check if the user is authenticated before trying to access the email

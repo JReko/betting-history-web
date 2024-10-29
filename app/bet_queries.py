@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from typing import List, Mapping, Any, Optional
 from flask_login import current_user
 from sqlalchemy import text
 from app import db
@@ -126,7 +126,7 @@ class BetQueries:
         return by_capper_results
 
     @staticmethod
-    def get_settled_bets_by_month():
+    def get_settled_bets_by_month() -> List[Mapping[str, Any]]:
         query = text("""
                 SELECT
                     DATE_TRUNC('month', event_date AT TIME ZONE 'UTC' AT TIME ZONE :timezone) AS month,
@@ -162,14 +162,14 @@ class BetQueries:
     @staticmethod
     def get_bet_by_id(bet_id, user_timezone: str) -> Bet:
         query = text("""
-                    SELECT
-                        *,
-                        event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone AS event_date_localized
-                    FROM bets
-                    WHERE
-                        bet_id = :id
-                        AND account_id = :account_id
-                """)
+            SELECT
+                *,
+                event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone AS event_date_localized
+            FROM bets
+            WHERE
+                bet_id = :id
+                AND account_id = :account_id
+        """)
 
         bet = db.session.execute(query, {
             'account_id': current_user.get_id(),
@@ -178,3 +178,62 @@ class BetQueries:
         }).fetchone()
 
         return bet
+
+    from typing import Optional, Any
+    from datetime import datetime
+    from sqlalchemy.sql import text
+
+    @staticmethod
+    def get_bets_for_report(start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, capper: Optional[str] = None) -> List[Mapping[str, Any]]:
+        base_query = """
+            SELECT 
+                sport,
+                {capper_select}
+                ROUND(SUM(CASE 
+                        WHEN result = 'Win' THEN potential_win_amount::NUMERIC
+                        WHEN result = 'Loss' THEN -stake_amount::NUMERIC
+                        ELSE 0  
+                    END), 2) AS returns,
+                SUM(CASE WHEN result = 'Win' THEN 1 ELSE 0 END) AS win_count,
+                SUM(CASE WHEN result = 'Loss' THEN 1 ELSE 0 END) AS loss_count,
+                SUM(CASE WHEN result = 'Refunded' THEN 1 ELSE 0 END) AS push_count
+            FROM 
+                bets
+            WHERE 
+                account_id = :account_id
+        """
+
+        # Initialize filter conditions and params dictionary
+        conditions = []
+        params = {'account_id': current_user.get_id()}
+
+        # Add filters conditionally
+        if start_date:
+            conditions.append("event_date >= :start_date")
+            params['start_date'] = start_date
+        if end_date:
+            conditions.append("event_date <= :end_date")
+            params['end_date'] = end_date
+        if capper:
+            conditions.append("capper = :capper")
+            params['capper'] = capper
+
+        # Add conditions to query if any filters are provided
+        if conditions:
+            base_query += " AND " + " AND ".join(conditions)
+
+        # Dynamically set GROUP BY and SELECT for capper if capper is provided
+        capper_select = "capper," if capper else ""
+        group_by_clause = "GROUP BY sport" + (", capper" if capper else "")
+
+        # Insert the dynamic capper selection and group_by
+        final_query = base_query.format(capper_select=capper_select) + f" {group_by_clause} ORDER BY returns DESC"
+
+        # Execute the query
+        query = text(final_query)
+        results = db.session.execute(query, params).mappings().fetchall()
+        return results
+
+
+
+

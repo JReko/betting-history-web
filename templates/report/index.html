@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}BetTracker: Custom Report{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="section-header">Generate Report</h2>
+    <p><i>Leave any filter blank to ignore that criteria in the report.</i></p>
+</div>
+    <form method="POST" action="{{ url_for('report.report') }}" class="mb-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="datetime-local" class="form-control" id="start_date" name="start_date" placeholder="Do not filter" value="{{ start_date if start_date else '' }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="datetime-local" class="form-control" id="end_date" name="end_date" placeholder="Do not filter" value="{{ end_date if end_date else '' }}">
+            </div>
+            <div class="col-md-3">
+                <label for="capper" class="form-label">Capper</label>
+                <input type="text" class="form-control" id="capper" name="capper" placeholder="Do not filter" value="{{ capper if capper else '' }}">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Generate Report</button>
+            </div>
+        </div>
+    </form>
+
+
+    {% if bets %}
+    <h3 class="section-header">Report Results</h3>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Capper</th>
+                <th>Returns</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ start_date }}</td>
+                <td>{{ end_date }}</td>
+                <td>{{ capper }}</td>
+                <td>
+                    {% if report_returns > 0 %}
+                    <span class="text-success">+{{ "{:.2f}".format(report_returns) }}$</span>
+                    {% elif report_returns < 0 %}
+                    <span class="text-danger">{{ "{:.2f}".format(report_returns) }}$</span>
+                    {% else %}
+                    <span>{{ "{:.2f}".format(report_returns) }}$</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Sport</th>
+                <th>Capper</th>
+                <th>Returns</th>
+                <th>Wins</th>
+                <th>Losses</th>
+                <th>Pushes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bet in bets %}
+            <tr>
+                <td>{{ bet.sport }}</td>
+                <td>{{ bet.capper }}</td>
+                <td>
+                    {% if bet.returns > 0 %}
+                    <span class="text-success">+{{ "{:.2f}".format(bet.returns) }}$</span>
+                    {% elif bet.returns < 0 %}
+                    <span class="text-danger">{{ "{:.2f}".format(bet.returns) }}$</span>
+                    {% else %}
+                    <span>{{ "{:.2f}".format(bet.returns) }}$</span>
+                    {% endif %}
+                </td>
+                <td>{{ bet.win_count }}</td>
+                <td>{{ bet.loss_count }}</td>
+                <td>{{ bet.push_count }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center">No results found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}
