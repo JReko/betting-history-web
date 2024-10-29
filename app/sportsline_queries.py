@@ -187,3 +187,51 @@ class SportslineQueries:
         }).mappings().fetchall()
 
         return returns_by_market
+
+    @staticmethod
+    def get_current_league_winning_cappers(league: str):
+        query = text("""
+            WITH roi_calculation AS (
+                SELECT 
+                    league, 
+                    capper,
+                        COUNT(sportsline_id) as bet_count,
+                    ROUND(SUM(CASE 
+                            WHEN result = 'WIN' THEN returns::NUMERIC
+                            WHEN result = 'LOSS' THEN -units::NUMERIC
+                            ELSE 0
+                        END), 2) AS returns,
+                    SUM(units) AS total_wagered,  -- Total units wagered
+                    ROUND(
+                        CASE 
+                            WHEN SUM(units) > 0 THEN (SUM(CASE 
+                                WHEN result = 'WIN' THEN returns::NUMERIC
+                                WHEN result = 'LOSS' THEN -units::NUMERIC
+                                ELSE 0
+                            END) / SUM(units::NUMERIC)) * 100  -- Calculate ROI percentage
+                            ELSE 0
+                        END, 2
+                    ) AS roi,  -- Round ROI to 2 decimal places
+                    SUM(CASE WHEN result = 'WIN' THEN 1 ELSE 0 END) AS win_count,
+                    SUM(CASE WHEN result = 'LOSS' THEN 1 ELSE 0 END) AS loss_count,
+                    SUM(CASE WHEN result = 'PUSH' THEN 1 ELSE 0 END) AS push_count
+                FROM 
+                    sportsline
+                WHERE 
+                    date > '2024-07-01 00:00:00' 
+                    and league = :league    
+                GROUP BY 
+                    league, capper
+            )
+            SELECT *
+            FROM roi_calculation
+            WHERE bet_count > 25 
+              AND roi > 5
+            ORDER BY roi DESC;
+        """)
+
+        cappers = db.session.execute(query, {
+            'league': league
+        }).mappings().fetchall()
+
+        return cappers

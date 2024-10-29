@@ -1,14 +1,10 @@
 from datetime import datetime
-
 from flask import Blueprint, request, render_template
 from flask_login import current_user
-
-from app.bet_model import Bet
 from app.bet_queries import BetQueries
 from app.utility_time_zone import UtilityTimeZone
 
 report_bp = Blueprint('report', __name__)
-
 
 
 @report_bp.route('/report', methods=['GET', 'POST'])

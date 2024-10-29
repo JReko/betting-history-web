@@ -206,7 +206,7 @@ def scrape_page(offset: int, chunk: int, capper_id: int = 51219409) -> bool:
     else:
 
         # Send the POST request
-        time.sleep(5)
+        time.sleep(15)
         response = requests.post(url, headers=headers, json=payload)
         if response.status_code != 200:
             print(f"Query failed with status code {response.status_code}")

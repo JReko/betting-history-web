@@ -1,4 +1,8 @@
-from flask import Blueprint, render_template
+from datetime import datetime
+
+from flask import Blueprint, render_template, request
+
+from app import db
 from app.sportsline_queries import SportslineQueries
 # Required for flask migrate to kick in
 from app.sportsline_model import Sportsline
@@ -6,11 +10,30 @@ from app.sportsline_model import Sportsline
 sportsline_bp = Blueprint('sportsline', __name__)
 
 
-@sportsline_bp.route('/sportsline', methods=['GET'])
+@sportsline_bp.route('/sportsline', methods=['GET', 'POST'])
 def sportsline_cappers():
+    cappers_to_tail = None
+    league = None
+
+    if request.method == "POST":
+        league = request.form.get('league')
+        cappers_to_tail = SportslineQueries.get_current_league_winning_cappers(league)
+
+    # Define the date filter
+    date_filter = datetime(2024, 1, 1, 0, 0, 0)
+    # Query to get distinct leagues with a date filter
+    distinct_leagues = (
+        db.session.query(Sportsline.league)
+        .filter(Sportsline.date >= date_filter)  # Filtering for dates on or after 2024-01-01 00:00:00
+        .distinct()
+        .all()
+    )
+    # Extracting league names from the result
+    leagues = [league[0] for league in distinct_leagues]
+
     cappers = SportslineQueries.get_all_sportsline_cappers()
 
-    return render_template('sportsline/index.html', cappers=cappers)
+    return render_template('sportsline/index.html', cappers=cappers, leagues=leagues, cappers_to_tail=cappers_to_tail, previously_selected_league=league)
 
 
 @sportsline_bp.route('/sportsline/capper/<capper>', methods=['GET'])
