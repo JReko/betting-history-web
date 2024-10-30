@@ -10,7 +10,7 @@
         <h2 class="section-header">Reports & New Bet</h2>
         <div class="row">
             <!-- Create a New Bet -->
-            <div class="col-md-6 mb-4">
+            <div class="col-md-12 mb-4">
                 <a href="{{ url_for('bet.bet_create') }}" class="card text-center">
                     <div class="card-body">
                         <div class="card-icon">
@@ -23,18 +23,16 @@
         </div>
     </div>
     <!-- Right column: Imports -->
-
     <div class="col-md-4 right-column">
         <h2 class="section-header">Import Bets</h2>
-        <div class="row gx-2 gy-2"> <!-- Reduced spacing classes for tighter gutters -->
-            <!-- Import Bets from Pinnacle -->
-            <div class="col-12 mb-2">
-                <a href="{{ url_for('imports.import_pinnacle_bets') }}" class="card text-center d-flex align-items-center">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="card-icon me-3">
+        <div class="row"> <!-- Reduced spacing classes for tighter gutters -->
+            <div class="col-12 mb-4">
+                <a href="{{ url_for('imports.import_pinnacle_bets') }}" class="card text-center">
+                    <div class="card-body">
+                        <div class="card-icon">
                             <i class="bi bi-cloud-upload"></i>
                         </div>
-                        <h5 class="card-title mb-0">Pinny</h5>
+                        <h5 class="card-title">Pinny</h5>
                     </div>
                 </a>
             </div>
