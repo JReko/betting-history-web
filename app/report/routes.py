@@ -11,15 +11,14 @@ report_bp = Blueprint('report', __name__)
 def report():
 
     bets = None
+    betting_stats = None
     report_returns = None
-    start_date = None
-    end_date = None
-    capper = None
 
     if request.method == "POST":
         start_date = request.form.get('start_date')
         end_date = request.form.get('end_date')
         capper = request.form.get('capper')
+        include_individual_bets = 'include_individual_bets' in request.form
 
         # If any filter is set to "Do not filter" (empty), treat it as None
         start_date = start_date if start_date else None
@@ -43,14 +42,31 @@ def report():
 
         capper = capper if capper else None
 
-        bets = BetQueries.get_bets_for_report(start_date_datetime_utc, end_date_datetime_utc, capper)
-        report_returns = sum(bet['returns'] for bet in bets)
+        betting_stats = BetQueries.get_betting_status_for_report(start_date_datetime_utc, end_date_datetime_utc, capper)
+        report_returns = sum(row['returns'] for row in betting_stats)
+
+        if include_individual_bets:
+            bets = BetQueries.get_bets_for_report(start_date_datetime_utc, end_date_datetime_utc, capper)
+
+            # Calculate cumulative sum
+            cumulative_sum = []
+            current_sum = 0.0
+
+            for bet in bets:
+                if bet['result'] in ['Win', 'Loss', 'Refunded']:
+                    if bet['result'] == 'Win':
+                        current_sum += bet['potential_win_amount']
+                    elif bet['result'] == 'Loss':
+                        current_sum -= bet['stake_amount']
+                    cumulative_sum.append(current_sum)
+
+            # Combine bets and cumulative_sum into a list of tuples
+            bets = list(zip(bets, cumulative_sum))
 
     return render_template(
         '/report/index.html',
         bets=bets,
+        betting_stats=betting_stats,
         report_returns=report_returns,
-        start_date=start_date,
-        end_date=end_date,
-        capper=capper,
+        form_data=request.form
     )

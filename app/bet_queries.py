@@ -184,7 +184,7 @@ class BetQueries:
     from sqlalchemy.sql import text
 
     @staticmethod
-    def get_bets_for_report(start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, capper: Optional[str] = None) -> List[Mapping[str, Any]]:
+    def get_betting_status_for_report(start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, capper: Optional[str] = None) -> List[Mapping[str, Any]]:
         base_query = """
             SELECT 
                 sport,
@@ -234,6 +234,52 @@ class BetQueries:
         results = db.session.execute(query, params).mappings().fetchall()
         return results
 
+    @staticmethod
+    def get_bets_for_report(start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, capper: Optional[str] = None) -> List[Mapping[str, Any]]:
+        base_query = """
+                SELECT 
+                    sport,
+                    book,
+                    capper,
+                    stake_amount,
+                    potential_win_amount,
+                    line,
+                    match,
+                    pick,
+                    result,
+                    event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone as event_date
+                FROM 
+                    bets
+                WHERE 
+                    account_id = :account_id
+            """
 
+        # Initialize filter conditions and params dictionary
+        conditions = []
+        params = {
+            'account_id': current_user.get_id(),
+            'user_timezone': current_user.get_timezone(),
+        }
 
+        # Add filters conditionally
+        if start_date:
+            conditions.append("event_date >= :start_date")
+            params['start_date'] = start_date
+        if end_date:
+            conditions.append("event_date <= :end_date")
+            params['end_date'] = end_date
+        if capper:
+            conditions.append("capper = :capper")
+            params['capper'] = capper
 
+        # Add conditions to query if any filters are provided
+        if conditions:
+            base_query += " AND " + " AND ".join(conditions)
+
+        # Insert the dynamic capper selection and group_by
+        final_query = base_query + f" ORDER BY event_date ASC"
+
+        # Execute the query
+        query = text(final_query)
+        results = db.session.execute(query, params).mappings().fetchall()
+        return results

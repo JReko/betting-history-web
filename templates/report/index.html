@@ -12,24 +12,30 @@
         <div class="row g-3">
             <div class="col-md-3">
                 <label for="start_date" class="form-label">Start Date</label>
-                <input type="datetime-local" class="form-control" id="start_date" name="start_date" placeholder="Do not filter" value="{{ start_date if start_date else '' }}">
+                <input type="datetime-local" class="form-control" id="start_date" name="start_date" placeholder="Do not filter" value="{{ form_data.get('start_date', '') }}">
             </div>
             <div class="col-md-3">
                 <label for="end_date" class="form-label">End Date</label>
-                <input type="datetime-local" class="form-control" id="end_date" name="end_date" placeholder="Do not filter" value="{{ end_date if end_date else '' }}">
+                <input type="datetime-local" class="form-control" id="end_date" name="end_date" placeholder="Do not filter" value="{{ form_data.get('end_date', '') }}">
             </div>
             <div class="col-md-3">
                 <label for="capper" class="form-label">Capper</label>
-                <input type="text" class="form-control" id="capper" name="capper" placeholder="Do not filter" value="{{ capper if capper else '' }}">
+                <input type="text" class="form-control" id="capper" name="capper" placeholder="Do not filter" value="{{ form_data.get('capper', '') }}">
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100">Generate Report</button>
             </div>
+            <div class="col-12 mt-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="include_individual_bets" name="include_individual_bets" {% if form_data.get('include_individual_bets') %}checked{% endif %}>
+                    <label class="form-check-label" for="include_individual_bets">
+                        Include Every Bet Individually
+                    </label>
+                </div>
+            </div>
         </div>
     </form>
-
-
-    {% if bets %}
+    {% if betting_stats %}
     <h3 class="section-header">Report Results</h3>
     <table class="table table-bordered table-striped">
         <thead>
@@ -42,9 +48,9 @@
         </thead>
         <tbody>
             <tr>
-                <td>{{ start_date }}</td>
-                <td>{{ end_date }}</td>
-                <td>{{ capper }}</td>
+                <td>{{ form_data.get('start_date', '') }}</td>
+                <td>{{ form_data.get('end_date', '') }}</td>
+                <td>{{ form_data.get('capper', '') }}</td>
                 <td>
                     {% if report_returns > 0 %}
                     <span class="text-success">+{{ "{:.2f}".format(report_returns) }}$</span>
@@ -69,26 +75,72 @@
             </tr>
         </thead>
         <tbody>
-            {% for bet in bets %}
+            {% for row in betting_stats %}
             <tr>
-                <td>{{ bet.sport }}</td>
-                <td>{{ bet.capper }}</td>
+                <td>{{ row.sport }}</td>
+                <td>{{ row.capper }}</td>
                 <td>
-                    {% if bet.returns > 0 %}
-                    <span class="text-success">+{{ "{:.2f}".format(bet.returns) }}$</span>
-                    {% elif bet.returns < 0 %}
-                    <span class="text-danger">{{ "{:.2f}".format(bet.returns) }}$</span>
+                    {% if row.returns > 0 %}
+                    <span class="text-success">+{{ "{:.2f}".format(row.returns) }}$</span>
+                    {% elif row.returns < 0 %}
+                    <span class="text-danger">{{ "{:.2f}".format(row.returns) }}$</span>
                     {% else %}
-                    <span>{{ "{:.2f}".format(bet.returns) }}$</span>
+                    <span>{{ "{:.2f}".format(row.returns) }}$</span>
                     {% endif %}
                 </td>
-                <td>{{ bet.win_count }}</td>
-                <td>{{ bet.loss_count }}</td>
-                <td>{{ bet.push_count }}</td>
+                <td>{{ row.win_count }}</td>
+                <td>{{ row.loss_count }}</td>
+                <td>{{ row.push_count }}</td>
             </tr>
             {% else %}
             <tr>
                 <td colspan="4" class="text-center">No results found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if bets %}
+    <table class="table table-bordered table-sm table-hover">
+        <thead>
+            <tr>
+                <th style="">#</th>
+                <th style="">Book</th>
+                <th style="">Sport</th>
+                <th style="">Event/Match</th>
+                <th style="">Pick</th>
+                <th style="">Amount</th>
+                <th style="">Line</th>
+                <th style="">Event Date</th>
+                <th style="">Capper</th>
+                <th style="">Cum. Profit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bet, cum_sum in bets %}
+            <tr {% if bet.result == 'Win' %}class="bg-win"{% endif %}
+                {% if bet.result == 'Loss' %}class="bg-loss"{% endif %}
+                {% if bet.result == 'Refunded' %}class="bg-void"{% endif %}
+                >
+                <td><a href="/bet/edit/{{ bet.bet_id }}">{{ loop.index }}</a></td>
+                <td>{{ bet.book }}</td>
+                <td>{{ bet.sport | default('', true) }}</td>
+                <td>{{ bet.match|truncate(40, True, '...') }}</td>
+                <td data-toggle="tooltip" title="{{ bet.pick }}">{{ bet.pick|truncate(35, True, '...') }}</td>
+                <!-- Format amount to 2 decimals -->
+                <td>{{ "%.2f"|format(bet.stake_amount) }}$</td>
+                <!-- Ensure positive lines display + sign -->
+                <td>{{ bet.line if bet.line < 0 else '+' + bet.line|string }}</td>
+                <td>{{ bet.event_date.strftime('%Y-%m-%d %H:%M:%S')[5:] }}</td>
+                <td><a href="/capper/{{ bet.capper }}">{{ bet.capper|default('', true)|truncate(12, True, '...') }}</a></td>
+                <td>
+                    {% if cum_sum > 0 %}
+                        +{{ "%.2f"|format(cum_sum) }}$
+                    {% elif cum_sum < 0 %}
+                        {{ "%.2f"|format(cum_sum) }}$
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
