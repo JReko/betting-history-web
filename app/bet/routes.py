@@ -17,25 +17,25 @@ bet_bp = Blueprint('bet', __name__)
 def bet_create():
     if request.method == "POST":
         bet_id = "ID_PROBLEM"
-        book = request.form.get("book")
+        book = request.form.get("book").strip()
         if book == "Bet365":
             bet_id = Bet.get_next_bet365_id()
         elif book == "Bet99":
             bet_id = Bet.get_next_bet99_id()
-        capper = request.form.get("capper")
-        amount = float(request.form.get("amount"))
+        capper = request.form.get("capper").strip()
+        amount = float(request.form.get("amount").strip())
         # Convert date to UTC as early as possible in our stack
-        event_date_string = request.form.get("event_date")
+        event_date_string = request.form.get("event_date").strip()
         event_date_datetime = datetime.strptime(event_date_string, UtilityTimeZone.get_form_input_date_format())
         event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date_datetime, current_user.get_timezone())
         event_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(event_date_datetime_localized)
 
-        sport = request.form.get("sport")
-        event_match = request.form.get("event_match")
-        pick = request.form.get("pick")
-        status = request.form.get("status")
+        sport = request.form.get("sport").strip()
+        event_match = request.form.get("event_match").strip()
+        pick = request.form.get("pick").strip()
+        status = request.form.get("status").strip()
         result = request.form.get("result") if request.form.get("result") != "None" else None
-        line = request.form.get("line")
+        line = request.form.get("line").strip()
         potential_win_amount = Service.calculate_potential_win_amount(float(amount), int(line))
 
         # Create new bet object
@@ -68,20 +68,20 @@ def bet_create():
 def bet_edit(user_inputted_bet_id):
     if request.method == "POST":
         bet_id = request.form.get("bet_id")
-        book = request.form.get("book")
-        capper = request.form.get("capper")
-        amount = float(request.form.get("amount"))
+        book = request.form.get("book").strip()
+        capper = request.form.get("capper").strip()
+        amount = float(request.form.get("amount").strip())
         # Convert date to UTC as early as possible in our stack
-        event_date_string = request.form.get("event_date")
+        event_date_string = request.form.get("event_date").strip()
         event_date_datetime = datetime.strptime(event_date_string, UtilityTimeZone.get_form_input_date_format())
         event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date_datetime,current_user.get_timezone())
         event_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(event_date_datetime_localized)
-        sport = request.form.get("sport")
-        event_match = request.form.get("event_match")
-        pick = request.form.get("pick")
-        status = request.form.get("status")
+        sport = request.form.get("sport").strip()
+        event_match = request.form.get("event_match").strip()
+        pick = request.form.get("pick").strip()
+        status = request.form.get("status").strip()
         result = request.form.get("result") if request.form.get("result") != "None" else None
-        line = request.form.get("line")
+        line = request.form.get("line").strip()
         potential_win_amount = Service.calculate_potential_win_amount(float(amount), int(line))
 
         bet = Bet.query.get(bet_id)

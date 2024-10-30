@@ -16,8 +16,8 @@ def assign_cappers():
         for i, bet_id in enumerate(bet_ids):
             # Find the bet by ID and update its capper
             bet = Bet.query.get(bet_id)
-            if bet:
-                bet.capper = capper_names[i]
+            if bet and capper_names[i]:
+                bet.capper = capper_names[i].strip()
                 db.session.commit()
 
         return redirect(url_for('bet.todays_bets'))
