@@ -33,7 +33,6 @@ def bet_create():
         sport = request.form.get("sport").strip()
         event_match = request.form.get("event_match").strip()
         pick = request.form.get("pick").strip()
-        status = request.form.get("status").strip()
         result = request.form.get("result") if request.form.get("result") != "None" else None
         line = request.form.get("line").strip()
         potential_win_amount = Service.calculate_potential_win_amount(float(amount), int(line))
@@ -49,7 +48,6 @@ def bet_create():
             event_date=event_date_datetime_utc,
             match=event_match,
             pick=pick,
-            status=status,
             result=result,
             line=line,
             account_id=current_user.get_id(),
@@ -79,14 +77,12 @@ def bet_edit(user_inputted_bet_id):
         sport = request.form.get("sport").strip()
         event_match = request.form.get("event_match").strip()
         pick = request.form.get("pick").strip()
-        status = request.form.get("status").strip()
         result = request.form.get("result") if request.form.get("result") != "None" else None
         line = request.form.get("line").strip()
         potential_win_amount = Service.calculate_potential_win_amount(float(amount), int(line))
 
         bet = Bet.query.get(bet_id)
         bet.book = book
-        bet.status = status
         bet.result = result
         bet.stake_amount = amount
         bet.potential_win_amount = potential_win_amount
