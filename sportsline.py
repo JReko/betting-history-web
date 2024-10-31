@@ -4,11 +4,40 @@ import time
 from datetime import datetime
 import psycopg2
 import requests
+from psycopg2.extras import execute_values
 
 
 def scrape_page(offset: int, chunk: int, capper_id: int = 51219409) -> bool:
     url = 'https://www.sportsline.com/ui-gateway/v1/graphql'
     print(f"Requesting: {chunk} records after {offset}")
+
+    # Create an empty list to hold the batch of values
+    batch_values = []
+
+    # Connection string
+    # DEV
+    conn = psycopg2.connect("postgresql://local_user:strong_password@localhost:5432/betting_history_web")
+
+    # Create a cursor to execute SQL queries
+    cursor = conn.cursor()
+
+    # SQL insert query
+    query = """
+        INSERT INTO sportsline (
+            sportsline_id, capper, date, league, market, event, pick, units, result, line, returns
+        ) VALUES %s
+        ON CONFLICT (sportsline_id) DO UPDATE SET
+            capper = EXCLUDED.capper,
+            date = EXCLUDED.date,
+            league = EXCLUDED.league,
+            market = EXCLUDED.market,
+            event = EXCLUDED.event,
+            pick = EXCLUDED.pick,
+            units = EXCLUDED.units,
+            result = EXCLUDED.result,
+            line = EXCLUDED.line,
+            returns = EXCLUDED.returns
+    """
 
     # Headers from the curl request
     headers = {
@@ -365,30 +394,6 @@ def scrape_page(offset: int, chunk: int, capper_id: int = 51219409) -> bool:
         parts = node['selectionLabel'].split()
         line = int(str.replace(parts[-1], ',', ''))
 
-        # Connection string
-        conn = psycopg2.connect("postgresql://local_user:strong_password@localhost:5432/betting_history_web")
-
-        # Create a cursor to execute SQL queries
-        cursor = conn.cursor()
-
-        # SQL insert query
-        query = """
-        INSERT INTO sportsline_test (
-            sportsline_id, capper, date, league, market, event, pick, units, result, line, returns
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (sportsline_id) DO UPDATE SET
-            capper = EXCLUDED.capper,
-            date = EXCLUDED.date,
-            league = EXCLUDED.league,
-            market = EXCLUDED.market,
-            event = EXCLUDED.event,
-            pick = EXCLUDED.pick,
-            units = EXCLUDED.units,
-            result = EXCLUDED.result,
-            line = EXCLUDED.line,
-            returns = EXCLUDED.returns
-        """
-
         returns = 0
         units = node['unit']
         if line > 0:
@@ -420,50 +425,67 @@ def scrape_page(offset: int, chunk: int, capper_id: int = 51219409) -> bool:
             returns
         )
 
-        # Execute the query and commit the transaction
-        cursor.execute(query, values)
-        conn.commit()
+        # Add the values to the batch list
+        batch_values.append(values)
 
-        # Close the cursor and connection
-        cursor.close()
-        conn.close()
+    # Execute the batch insert with `execute_values`
+    execute_values(cursor, query, batch_values)
+    conn.commit()
+
+    # Get the current time and format it as 'YYYY-MM-DD hh:mmAM/PM'
+    current_time = datetime.now().strftime("%Y-%m-%d %I:%M%p")
+    # Update the Settings table with the formatted time
+    update_query = """
+        UPDATE 
+            Settings
+        SET
+            value = %s
+        WHERE
+            name = 'sportsline_last_updated'
+    """
+    cursor.execute(update_query, (current_time,))
+    conn.commit()
+
+    # Close the cursor and connection
+    cursor.close()
+    conn.close()
 
     return response_data.get('data', {}).get('expertPicksV2', {}).get('pageInfo', {}).get('hasNextPage', False)
 
 
 for expert_id in [
-    # 15770,  # Zack Cimini
-    # 51219409,  # Jimmie Kaylor
-    # 15150,  # Adam Silverstein
-    # 51243297,  # Alex Selesnick
-    # 51297150,  # Bruce Marshall
-    # 7950,  # Micah Roberts
-    # 50774572,  # Matt Severance
-    # 15731,  # Mike Tierney
-    # 51283976,  # Bob Konarski
-    # 51291867,  # Erik Kuselias
-    # 15810,  # Mike McClure
-    # 51302558,  # Daniel Vithlani
-    # 51295899,  # Angelo Magliocca
-    # 13273,  # Tom Fornelli
-    # 13773,  # Larry Hartstein
-    # 51288803,  # Sia Nejad
-    # 3828,  # Dave Richard
-    # 15733,  # Josh Nagel
-    # 16030,  # Emory Hunt
-    # 33404218,  # Mike Barner
-    # 14890,  # R.J. White
-    # 14830,  # Jason La Canfora
-    # 51190044,  # Jeff Hochman
-    # 51282681,  # Eric Cohen
-    # 50681998,  # Gene Menez
-    # 15751,  # Todd Fuhrman
-    # 13910,  # Matt Snyder
-    # 13230,  # Chip Patterson
-    # 51264910,  # Jon Eimer
-    # 51306423,  # Thomas Casale
-    # 2156857,  # Brad Botkin
-    # 51295857,  # Mackenzie Books
+    15770,  # Zack Cimini
+    51219409,  # Jimmie Kaylor
+    15150,  # Adam Silverstein
+    51243297,  # Alex Selesnick
+    51297150,  # Bruce Marshall
+    7950,  # Micah Roberts
+    50774572,  # Matt Severance
+    15731,  # Mike Tierney
+    51283976,  # Bob Konarski
+    51291867,  # Erik Kuselias
+    15810,  # Mike McClure
+    51302558,  # Daniel Vithlani
+    51295899,  # Angelo Magliocca
+    13273,  # Tom Fornelli
+    13773,  # Larry Hartstein
+    51288803,  # Sia Nejad
+    3828,  # Dave Richard
+    15733,  # Josh Nagel
+    16030,  # Emory Hunt
+    33404218,  # Mike Barner
+    14890,  # R.J. White
+    14830,  # Jason La Canfora
+    51190044,  # Jeff Hochman
+    51282681,  # Eric Cohen
+    50681998,  # Gene Menez
+    15751,  # Todd Fuhrman
+    13910,  # Matt Snyder
+    13230,  # Chip Patterson
+    51264910,  # Jon Eimer
+    51306423,  # Thomas Casale
+    2156857,  # Brad Botkin
+    51295857,  # Mackenzie Books
 ]:
     chunk = 100
     offset = 0
@@ -473,3 +495,13 @@ for expert_id in [
         if not has_next_page:
             print("That's all she wrote!")
             break
+
+        # This condition is here for subsequent scrapes
+        # The OG scrape is meant to have scraped off all records on 2024-10-27
+        # Not fetching the first page of 100 records periodically should be more than enough to update each cappers with most recent bets
+        if chunk == 100 and offset == 100:
+            print("We fetched the most recent 100 records. Move on.")
+            break
+
+
+

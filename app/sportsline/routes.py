@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request
 
 from app import db
+from app.settings_model import Settings
 from app.sportsline_queries import SportslineQueries
 # Required for flask migrate to kick in
 from app.sportsline_model import Sportsline
@@ -19,7 +20,6 @@ def sportsline_cappers():
         league = request.form.get('league')
         cappers_to_tail = SportslineQueries.get_current_league_winning_cappers(league)
 
-    # Define the date filter
     date_filter = datetime(2024, 1, 1, 0, 0, 0)
     # Query to get distinct leagues with a date filter
     distinct_leagues = (
@@ -33,7 +33,18 @@ def sportsline_cappers():
 
     cappers = SportslineQueries.get_all_sportsline_cappers()
 
-    return render_template('sportsline/index.html', cappers=cappers, leagues=leagues, cappers_to_tail=cappers_to_tail, previously_selected_league=league)
+    sportsline_last_updated = db.session.query(Settings.value).filter(
+        Settings.name == 'sportsline_last_updated'
+    ).scalar()
+
+    return render_template(
+        'sportsline/index.html',
+        cappers=cappers,
+        sportsline_last_updated=sportsline_last_updated,
+        leagues=leagues,
+        cappers_to_tail=cappers_to_tail,
+        previously_selected_league=league
+    )
 
 
 @sportsline_bp.route('/sportsline/capper/<capper>', methods=['GET'])

@@ -4,6 +4,10 @@
 
 {% block content %}
 <div class="container mt-4">
+    <!-- Display the last update timestamp -->
+    <div class="alert alert-info">
+        Last updated: {{ sportsline_last_updated if sportsline_last_updated else "N/A" }}
+    </div>
     <div class="row g-3">
         <div class="col-md-6"> <!-- Adjusted width for the table -->
             <table class="table table-bordered table-sm table-hover">

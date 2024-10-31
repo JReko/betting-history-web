@@ -226,7 +226,7 @@ class SportslineQueries:
             SELECT *
             FROM roi_calculation
             WHERE bet_count > 25 
-              AND roi > 5
+              AND roi > 0
             ORDER BY roi DESC;
         """)
 
