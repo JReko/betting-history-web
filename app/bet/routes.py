@@ -59,7 +59,7 @@ def bet_create():
 
         return redirect(url_for('bet.todays_bets'))  # Redirect to the bets page
 
-    return render_template("/bet/create.html")
+    return render_template("/bet/create.html", current_datetime = datetime.now(tz=pytz.timezone(current_user.get_timezone())).strftime(UtilityTimeZone.get_form_input_date_format()))
 
 
 @bet_bp.route("/bet/edit/<user_inputted_bet_id>", methods=["GET", "POST"])
@@ -72,7 +72,7 @@ def bet_edit(user_inputted_bet_id):
         # Convert date to UTC as early as possible in our stack
         event_date_string = request.form.get("event_date").strip()
         event_date_datetime = datetime.strptime(event_date_string, UtilityTimeZone.get_form_input_date_format())
-        event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date_datetime,current_user.get_timezone())
+        event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date_datetime, current_user.get_timezone())
         event_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(event_date_datetime_localized)
         sport = request.form.get("sport").strip()
         event_match = request.form.get("event_match").strip()

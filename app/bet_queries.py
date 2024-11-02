@@ -22,7 +22,6 @@ class BetQueries:
                 event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone as event_date,
                 capper,
                 potential_win_amount,
-                status,
                 result
             FROM
                 bets
@@ -184,7 +183,7 @@ class BetQueries:
     from sqlalchemy.sql import text
 
     @staticmethod
-    def get_betting_status_for_report(start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, capper: Optional[str] = None) -> List[Mapping[str, Any]]:
+    def get_betting_stats_for_report(start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, capper: Optional[str] = None) -> List[Mapping[str, Any]]:
         base_query = """
             SELECT 
                 sport,

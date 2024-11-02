@@ -17,7 +17,8 @@ from app import db
 # {"id":13,"name":"sport_league","value":"mma - UFC"},
 # {"id":14,"name":"sport_league","value":"basketball - KBL"},
 # {"id":15,"name":"sport_league","value":"mma - PFL"},
-# {"id":16,"name":"sportsline_latest_update","value":"2024-10-31 11:44AM"}
+# {"id":16,"name":"sportsline_latest_update","value":"2024-10-31 11:44AM"},
+# {"id":17,"name":"sport_league","value":"soccer"}
 # ]
 
 

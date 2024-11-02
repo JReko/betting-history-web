@@ -63,7 +63,6 @@ This application is designed to help you track your bets and analyze your bettin
 - `docker cp ./latest.dump bet_tracking_postgres:/tmp/latest.dump` to copy our dump into the container
 - `docker exec -it bet_tracking_postgres pg_restore --verbose --clean --no-acl --no-owner -h localhost -U local_user -d betting_history_web /tmp/latest.dump` to restore
 
-
 #### Logs
 - `heroku logs --tail`
 

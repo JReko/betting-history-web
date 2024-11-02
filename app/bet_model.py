@@ -58,7 +58,7 @@ class Bet(db.Model):
                 SELECT * 
                 FROM bets
                 WHERE 
-                    status = 'Settled'
+                    result IS NOT NULL
                     AND capper IS NOT NULL
                     AND account_id = :account_id
             ''')

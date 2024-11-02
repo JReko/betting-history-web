@@ -178,8 +178,10 @@ class PinnacleBetPageScraper:
                      .replace('(Games)', '')
                      .replace('(Hits Allowed)', '')
                      .replace('(must start)', '')
-                     .replace('Live', '')
                      .strip())
+            # Fix: LiveKaren Khachanov (Sets) vs Ugo Humbert (Sets)
+            if inner_div_value.get_text().startswith('Live'):
+                match = match[4:] + ' (live)'
 
         # Event date
         event_date_datetime = None

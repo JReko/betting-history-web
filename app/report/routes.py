@@ -22,6 +22,7 @@ def report():
 
         # If any filter is set to "Do not filter" (empty), treat it as None
         start_date = start_date if start_date else None
+        end_date = end_date if end_date else None
 
         # Convert date to UTC as early as possible in our stack
         if start_date:
@@ -30,7 +31,6 @@ def report():
             start_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(start_date_datetime_localized)
         else:
             start_date_datetime_utc = None
-            start_date = None
 
         if end_date:
             end_date_datetime = datetime.strptime(end_date, UtilityTimeZone.get_form_input_date_format())
@@ -38,11 +38,10 @@ def report():
             end_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(end_date_datetime_localized)
         else:
             end_date_datetime_utc = None
-            end_date = None
 
         capper = capper if capper else None
 
-        betting_stats = BetQueries.get_betting_status_for_report(start_date_datetime_utc, end_date_datetime_utc, capper)
+        betting_stats = BetQueries.get_betting_stats_for_report(start_date_datetime_utc, end_date_datetime_utc, capper)
         report_returns = sum(row['returns'] for row in betting_stats)
 
         if include_individual_bets:
