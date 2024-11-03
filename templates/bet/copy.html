@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Bets History{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Copy Sports Bet</h1>
+    <form action="/bet/copy/{{ bet.bet_id }}" method="post">
+        <!-- CSRF protection (if needed) -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+            <label for="book" class="form-label">Book</label>
+            <select id="book" name="book" class="form-select" required>
+                <option value="Pinnacle" {% if bet.book == 'Pinnacle' %}selected{% endif %}>Pinnacle</option>
+                <option value="Bet365" {% if bet.book == 'Bet365' %}selected{% endif %}>Bet365</option>
+                <option value="Bet99" {% if bet.book == 'Bet99' %}selected{% endif %}>Bet99</option>
+                <option value="Other" {% if bet.book == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="capper" class="form-label">Capper</label>
+            <input type="text" id="capper" name="capper" class="form-control" value="{{ bet.capper }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input type="number" step="0.01" id="amount" name="amount" class="form-control" value="{{ bet.stake_amount }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="line" class="form-label">Line (American odds)</label>
+            <input type="text" id="line" name="line" class="form-control" pattern="[-+]?[0-9]+" title="Please enter a valid American odds line (e.g., +110 or -225)" value="{{ bet.line }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="sport" class="form-label">Sport/League</label>
+            <select id="sport" name="sport" class="form-select" required>
+                {% for league in sport_leagues %}
+                    <option value="{{ league.value }}" {% if bet.sport == league.value %}selected{% endif %}>{{ league.value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="event_date" class="form-label">Event Date</label>
+            <input type="datetime-local" id="event_date" name="event_date" class="form-control" value="{{ bet.event_date_localized }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="event_match" class="form-label">Event/Match</label>
+            <input type="text" id="event_match" name="event_match" class="form-control" value="{{ bet.match }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="pick" class="form-label">Pick</label>
+            <input type="text" id="pick" name="pick" class="form-control" value="{{ bet.pick }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="result" class="form-label">Result</label>
+            <select id="result" name="result" class="form-select" required>
+                <option value="None">Pending</option>
+                <option value="Win" {% if bet.result == 'Win' %}selected{% endif %}>Win</option>
+                <option value="Loss" {% if bet.result == 'Loss' %}selected{% endif %}>Loss</option>
+                <option value="Refunded" {% if bet.result == 'Refunded' %}selected{% endif %}>Refunded</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock %}

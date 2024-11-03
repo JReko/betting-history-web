@@ -105,6 +105,64 @@ def bet_edit(user_inputted_bet_id):
         return render_template("/bet/edit.html", bet=bet)
 
 
+@bet_bp.route("/bet/copy/<user_inputted_bet_id>", methods=["GET", "POST"])
+def bet_copy(user_inputted_bet_id):
+    if request.method == "POST":
+        bet_id = "ID_PROBLEM"
+        book = request.form.get("book").strip()
+        if book == "Bet365":
+            bet_id = Bet.get_next_bet365_id()
+        elif book == "Bet99":
+            bet_id = Bet.get_next_bet99_id()
+        elif book == "Pinnacle":
+            bet_id = Bet.get_next_pinnacle_id()
+
+        capper = request.form.get("capper").strip()
+        amount = float(request.form.get("amount").strip())
+        # Convert date to UTC as early as possible in our stack
+        event_date_string = request.form.get("event_date").strip()
+        event_date_datetime = datetime.strptime(event_date_string, UtilityTimeZone.get_form_input_date_format())
+        event_date_datetime_localized = UtilityTimeZone.localize_datetime(event_date_datetime,
+                                                                          current_user.get_timezone())
+        event_date_datetime_utc = UtilityTimeZone.convert_datetime_to_utc(event_date_datetime_localized)
+
+        sport = request.form.get("sport").strip()
+        event_match = request.form.get("event_match").strip()
+        pick = request.form.get("pick").strip()
+        result = request.form.get("result") if request.form.get("result") != "None" else None
+        line = request.form.get("line").strip()
+        potential_win_amount = Service.calculate_potential_win_amount(float(amount), int(line))
+
+        # Create new bet object
+        bet = Bet(
+            bet_id=bet_id,
+            book=book,
+            capper=capper,
+            stake_amount=amount,
+            potential_win_amount=potential_win_amount,
+            sport=sport,
+            event_date=event_date_datetime_utc,
+            match=event_match,
+            pick=pick,
+            result=result,
+            line=line,
+            account_id=current_user.get_id(),
+        )
+
+        # Save to the database
+        db.session.add(bet)
+        db.session.commit()
+
+        return redirect(url_for('bet.bets_by_date', date_parameter=event_date_datetime_localized.strftime("%Y-%m-%d")))  # Redirect to the bets page
+
+    elif request.method == "GET":
+        bet: Bet = BetQueries.get_bet_by_id(user_inputted_bet_id, current_user.get_timezone())
+        if not bet:
+            abort(404)
+
+        return render_template("/bet/copy.html", bet=bet)
+
+
 @bet_bp.route("/bets/today")
 def todays_bets():
     # Get today's date

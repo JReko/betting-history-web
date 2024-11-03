@@ -41,16 +41,17 @@
 <table class="table table-bordered table-sm table-hover">
     <thead>
         <tr>
-            <th style="">#</th>
-            <th style="">Book</th>
-            <th style="">Sport</th>
-            <th style="">Event/Match</th>
-            <th style="">Pick</th>
-            <th style="">Amount</th>
-            <th style="">Line</th>
-            <th style="">Event Date</th>
-            <th style="">Capper</th>
-            <th style="">Profit</th>
+            <th>#</th>
+            <th></th>
+            <th>Book</th>
+            <th>Sport</th>
+            <th>Event/Match</th>
+            <th>Pick</th>
+            <th>Amount</th>
+            <th>Line</th>
+            <th>Event Date</th>
+            <th>Capper</th>
+            <th>Profit</th>
         </tr>
     </thead>
     <tbody>
@@ -60,6 +61,7 @@
             {% if bet.result == 'Refunded' %}class="bg-void"{% endif %}
             >
             <td><a href="/bet/edit/{{ bet.bet_id }}">{{ loop.index }}</a></td>
+            <td><a href="/bet/copy/{{ bet.bet_id }}"><i class="bi bi-clipboard"></i></a></td>
             <td>{{ bet.book }}</td>
             <td>{{ bet.sport | default('', true) }}</td>
             <td>{{ bet.match|truncate(40, True, '...') }}</td>

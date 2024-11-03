@@ -94,3 +94,17 @@ class Bet(db.Model):
         next_id = max_id + 1
 
         return f"bet99_{next_id}"
+
+    @staticmethod
+    def get_next_pinnacle_id():
+        query = text("""
+                SELECT MAX(CAST(SUBSTRING(bet_id FROM LENGTH('pinnacle_') + 1) AS INTEGER)) AS max_id
+                FROM bets
+                WHERE bet_id LIKE 'pinnacle_%';
+            """)
+        result = db.session.execute(query).fetchone()
+
+        max_id = result[0] if result[0] is not None else 0  # Handle case where no IDs exist
+        next_id = max_id + 1
+
+        return f"pinnacle_{next_id}"
