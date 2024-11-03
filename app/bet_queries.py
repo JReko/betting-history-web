@@ -236,7 +236,8 @@ class BetQueries:
     @staticmethod
     def get_bets_for_report(start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, capper: Optional[str] = None) -> List[Mapping[str, Any]]:
         base_query = """
-                SELECT 
+                SELECT
+                    bet_id,
                     sport,
                     book,
                     capper,

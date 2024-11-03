@@ -9,6 +9,7 @@ class CapperQueries:
     def get_all_capper_bets(capper: str) -> dict:
         query = text("""
             SELECT
+                bet_id,
                 capper,
                 status,
                 result,
@@ -18,6 +19,7 @@ class CapperQueries:
                 match,
                 pick,
                 book,
+                sport,
                 event_date AT TIME ZONE 'UTC' AT TIME ZONE :user_timezone as event_date
             FROM 
                 bets

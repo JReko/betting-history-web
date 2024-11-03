@@ -52,12 +52,13 @@ def report():
             current_sum = 0.0
 
             for bet in bets:
-                if bet['result'] in ['Win', 'Loss', 'Refunded']:
-                    if bet['result'] == 'Win':
-                        current_sum += bet['potential_win_amount']
-                    elif bet['result'] == 'Loss':
-                        current_sum -= bet['stake_amount']
-                    cumulative_sum.append(current_sum)
+                if bet['result'] == 'Win':
+                    current_sum += bet['potential_win_amount']
+                elif bet['result'] == 'Loss':
+                    current_sum -= bet['stake_amount']
+                else:
+                    current_sum += 0.00
+                cumulative_sum.append(current_sum)
 
             # Combine bets and cumulative_sum into a list of tuples
             bets = list(zip(bets, cumulative_sum))

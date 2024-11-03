@@ -57,7 +57,8 @@
             <thead>
                 <tr>
                     <th style="width: 3%;">#</th>
-                    <th style="width: 10%;">Bet ID</th>
+                    <th>Book</th>
+                    <th>Sport</th>
                     <th>Event</th>
                     <th>Pick</th>
                     <th style="width: 6%;">Stake</th>
@@ -74,8 +75,9 @@
                     {% if bet.result == 'Loss' %}class="bg-loss"{% endif %}
                     {% if bet.result in ['Voided', 'Refunded', 'Push'] %}class="bg-void"{% endif %}
                 >
-                    <td>{{ loop.index }}</td>
-                    <td>{{ bet.bet_id }}</td>
+                    <td><a href="/bet/edit/{{ bet.bet_id }}">{{ loop.index }}</a></td>
+                    <td>{{ bet.book }}</td>
+                    <td>{{ bet.sport }}</td>
                     <td>{{ bet.match|truncate(40, True, '...') }}</td>
                     <td>{{ bet.pick|truncate(35, True, '...') }}</td>
                     <td>{{ "{:.2f}".format(bet.stake_amount) }}$</td>
