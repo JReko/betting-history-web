@@ -16,7 +16,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
                 <label for="betFile" class="form-label">Select Pinnacle Bets File</label>
-                <input class="form-control" type="file" id="betFile" name="betFile" accept=".htm" required>
+                <input class="form-control" type="file" id="betFile" name="betFile" accept=".html,.htm,.mhtml" required>
             </div>
             <button type="submit" class="btn btn-primary">Import Bets</button>
         </form>

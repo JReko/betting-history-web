@@ -120,8 +120,20 @@ class PinnacleBetPageScraper:
         # *** Stake & potential win amounts
         div = bet.find('div', class_="rightAlignment-aAUDqtTzac")
         spans = div.find_all('span')
-
-        if status == "Pending":
+        if result == "Refunded":
+            # 00 = {Tag} < span > Betno. < / span >
+            # 01 = {Tag} < span > Refunded < / span >
+            # 02 = {Tag} < span > Accepted: < / span >
+            # 03 = {Tag} < span > Nov 3, 2024, 11: 18PM < / span >
+            # 04 = {Tag} < span > Stake: < / span >
+            # 05 = {Tag} < span > 5.00 < / span >
+            # 06 = {Tag} < span > Win: < / span >
+            # 07 = {Tag} < span > 4.81 < / span >
+            # 8 = {Tag} < span > Payout: < / span >
+            # 9 = {Tag} < span > 9.81 < / span >
+            stake_amount = float(spans[5].get_text(strip=True))
+            potential_win_amount = float(spans[7].get_text(strip=True))
+        elif status == "Pending":
             # 0 = {Tag} <span>Bet no.</span>
             # 1 = {Tag} <span>Pending</span>
             # 2 = {Tag} <span>Stake:</span>
