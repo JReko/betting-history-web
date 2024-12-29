@@ -83,9 +83,11 @@ class PinnacleBetPageScraper:
             # Tennis
             elif sport == "tennis" and "ATP" in event_information_text.upper():
                 sport = f"{sport} - ATP"
+            elif sport == "tennis" and "UNITED CUP MEN" in event_information_text.upper():
+                sport = f"{sport} - ATP"
             elif sport == "tennis" and "WTA" in event_information_text.upper():
                 sport = f"{sport} - WTA"
-            elif sport == "tennis" and "WOMENS" in event_information_text.upper():
+            elif sport == "tennis" and "UNITED CUP WOMEN" in event_information_text.upper():
                 sport = f"{sport} - WTA"
             # Baseball
             elif sport == "baseball" and "MLB" in event_information_text.upper():
