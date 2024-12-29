@@ -384,6 +384,8 @@ def scrape_page(offset: int, chunk: int, capper_id: int = 51219409) -> bool:
             market_to_insert = 'MONEY_LINE_PARTIAL'
         elif market == 'PROP' and market_selection == 'FIRST_HALF_MONEY_LINE':
             market_to_insert = 'MONEY_LINE_PARTIAL'
+        elif market == 'PROP' and market_selection == 'FIRST_QUARTER_MONEY_LINE':
+            market_to_insert = 'MONEY_LINE_PARTIAL'
 
         else:
             print(bet)
@@ -486,6 +488,8 @@ for expert_id in [
     51306423,  # Thomas Casale
     2156857,  # Brad Botkin
     51295857,  # Mackenzie Books
+    51310505,  # Megan Shoup
+    51314525,  # Doug Prop Bet Guy
 ]:
     chunk = 100
     offset = 0
