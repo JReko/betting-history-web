@@ -56,6 +56,14 @@ class PinnacleBetPageScraper:
         # Other cases are like
         # "Settled - Win"
         # "Settled - Loss"
+        # Cancelled is the same has "Refunded"
+        # Cancelled appeared for the first time in early Jan 2025 when a tennis match isn't completed
+        elif status == "Cancelled":
+            status = "Settled"
+            result = "Refunded"
+        # Other cases are like
+        # "Settled - Win"
+        # "Settled - Loss"
         elif status == "Settled":
             result = spans_result[2].get_text(strip=True)
 
@@ -126,7 +134,7 @@ class PinnacleBetPageScraper:
         # *** Stake & potential win amounts
         div = bet.find('div', class_="rightAlignment-aAUDqtTzac")
         spans = div.find_all('span')
-        if result == "Refunded":
+        if result == "Refunded" or result == "Cancelled":
             # 00 = {Tag} < span > Betno. < / span >
             # 01 = {Tag} < span > Refunded < / span >
             # 02 = {Tag} < span > Accepted: < / span >
