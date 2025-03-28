@@ -9,7 +9,58 @@
         Last updated: {{ sportsline_last_updated if sportsline_last_updated else "N/A" }}
     </div>
     <div class="row g-3">
-        <div class="col-md-6"> <!-- Adjusted width for the table -->
+        <div class="col-md-6">
+            <h2 class="section-header">Winning Cappers by League</h2>
+            <p><i>Winning cappers for the latest season of every league</i></p>
+            {% if cappers_to_tail %}
+                {% for league, rows in cappers_to_tail.items() %}
+                    <h3>{{ league }}</h3>
+                    <table class="table table-bordered table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Capper</th>
+                                <th>Units won</th>
+                                <th>Units wagered</th>
+                                <th>Wins</th>
+                                <th>Losses</th>
+                                <th>Pushes</th>
+                                <th>ROI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td><a href="/sportsline/capper/{{ row.capper }}">{{ row.capper }}</a></td>
+                                <td class="{% if row.returns < 0 %}text-danger{% else %}text-success{% endif %}">
+                                    <strong>
+                                    {% if row.returns > 0 %}
+                                        +{{ "%.2f"|format(row.returns) }} units
+                                    {% elif row.returns < 0 %}
+                                        {{ "%.2f"|format(row.returns) }} units
+                                    {% else %}
+                                        0 units
+                                    {% endif %}
+                                    </strong>
+                                </td>
+                                <td>{{ row.total_wagered }}</td>
+                                <td>{{ row.win_count }}</td>
+                                <td>{{ row.loss_count }}</td>
+                                <td>{{ row.push_count }}</td>
+                                <td>{{ row.roi }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endfor %}
+            {% else %}
+                <p>No winning cappers found for any league.</p>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+             <h2 class="section-header">Lifetime stats for all cappers</h2>
+            <!-- Lifetime results table -->
             <table class="table table-bordered table-sm table-hover">
                 <thead>
                     <tr>
@@ -40,66 +91,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-        <div class="col-md-6">
-            <h2 class="section-header">Choose a league</h2>
-            <p><i>Generate a list of cappers with 25+ bets and positive ROI for current seasons (> 2024-07-01)</i></p>
-            <form method="POST" action="{{ url_for('sportsline.sportsline_cappers') }}" class="mb-4">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="row g-3">
-                    <div class="col-md-12">
-                        <label for="league" class="form-label">League</label>
-                        <select id="league" name="league" class="form-select" required>
-                            {% for league in leagues %}
-                                <option value="{{ league }}" {% if previously_selected_league == league %}selected{% endif %}>{{ league }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-12 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Generate Report</button>
-                    </div>
-                </div>
-            </form>
-            {% if cappers_to_tail %}
-            <table class="table table-bordered table-sm table-hover">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Capper</th>
-                        <th>ROI</th>
-                        <th>Units won</th>
-                        <th>Units wagered</th>
-                        <th>Wins</th>
-                        <th>Losses</th>
-                        <th>Pushes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in cappers_to_tail %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td><a href="/sportsline/capper/{{ row.capper }}">{{ row.capper }}</a></td>
-                        <td>{{ row.roi }}%</td>
-                        <td class="{% if row.returns < 0 %}text-danger{% else %}text-success{% endif %}">
-                            <strong>
-                            {% if row.returns > 0 %}
-                                +{{ "%.2f"|format(row.returns) }} units
-                            {% elif row.returns < 0 %}
-                                {{ "%.2f"|format(row.returns) }} units
-                            {% else %}
-                                0 units
-                            {% endif %}
-                            </strong>
-                        </td>
-                        <td>{{ row.total_wagered }}</td>
-                        <td>{{ row.win_count }}</td>
-                        <td>{{ row.loss_count }}</td>
-                        <td>{{ row.push_count }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
         </div>
     </div>
 </div>

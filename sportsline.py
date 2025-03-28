@@ -377,6 +377,12 @@ def scrape_page(offset: int, chunk: int, capper_id: int = 51219409) -> bool:
             market_to_insert = 'PROP'
         elif market == 'PROP' and market_selection == 'TOTAL_PASSING_PLUS_RUSHING_YARDS':
             market_to_insert = 'PROP'
+        elif market == 'PROP' and market_selection == 'TOTAL_SHOTS_ON_GOAL':
+            market_to_insert = 'PROP'
+        elif market == 'PROP' and market_selection == 'ANYTIME_GOAL_SCORER':
+            market_to_insert = 'PROP'
+        elif market == 'PROP' and market_selection == 'TOTAL_HITS_ALLOWED':
+            market_to_insert = 'PROP'
 
         elif market == 'MONEY_LINE':
             market_to_insert = 'MONEY_LINE'
@@ -490,22 +496,24 @@ for expert_id in [
     51295857,  # Mackenzie Books
     51310505,  # Megan Shoup
     51314525,  # Doug Prop Bet Guy
+    51117259,  # Tim Doyle
 ]:
     chunk = 100
     offset = 0
     while True:
         has_next_page = scrape_page(offset, chunk, expert_id)
         offset = offset + chunk
-        if not has_next_page:
-            print("That's all she wrote!")
-            break
-
         # This condition is here for subsequent scrapes
         # The OG scrape is meant to have scraped off all records on 2024-10-27
         # Not fetching the first page of 100 records periodically should be more than enough to update each cappers with most recent bets
         if chunk == 100 and offset == 100:
             print("We fetched the most recent 100 records. Move on.")
             break
+        if not has_next_page:
+            print("That's all she wrote!")
+            break
+
+
 
 
 
