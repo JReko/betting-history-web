@@ -13,23 +13,16 @@ sportsline_bp = Blueprint('sportsline', __name__)
 
 @sportsline_bp.route('/sportsline', methods=['GET', 'POST'])
 def sportsline_cappers():
-    cappers_to_tail = None
-    league = None
-
-    if request.method == "POST":
-        league = request.form.get('league')
-        cappers_to_tail = SportslineQueries.get_current_league_winning_cappers(league)
-
-    date_filter = datetime(2024, 1, 1, 0, 0, 0)
-    # Query to get distinct leagues with a date filter
-    distinct_leagues = (
-        db.session.query(Sportsline.league)
-        .filter(Sportsline.date >= date_filter)  # Filtering for dates on or after 2024-01-01 00:00:00
-        .distinct()
-        .all()
-    )
-    # Extracting league names from the result
-    leagues = [league[0] for league in distinct_leagues]
+    # Hardcoded leagues with the start dates of their latest seasons.
+    # (Update these dates as needed.)
+    hardcoded_leagues = {
+        'NHL': datetime(2024, 10, 1, 0, 0, 0),
+        'MLB': datetime(2025, 3, 15, 0, 0, 0),
+        'NBA': datetime(2024, 10, 1, 0, 0, 0),
+        'NFL': datetime(2024, 9, 1, 0, 0, 0),
+        'NCAAB': datetime(2024, 11, 1, 0, 0, 0),
+        'NCAAF': datetime(2024, 8, 15, 0, 0, 0)
+    }
 
     cappers = SportslineQueries.get_all_sportsline_cappers()
 
@@ -37,13 +30,17 @@ def sportsline_cappers():
         Settings.name == 'sportsline_last_updated'
     ).scalar()
 
+    # Iterate over each league to get the query results using its start date.
+    cappers_to_tail = {}
+    for league, start_date in hardcoded_leagues.items():
+        cappers_to_tail[league] = SportslineQueries.get_current_league_winning_cappers(league, start_date)
+
     return render_template(
         'sportsline/index.html',
         cappers=cappers,
         sportsline_last_updated=sportsline_last_updated,
-        leagues=leagues,
+        leagues=hardcoded_leagues,
         cappers_to_tail=cappers_to_tail,
-        previously_selected_league=league
     )
 
 

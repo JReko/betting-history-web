@@ -1,5 +1,6 @@
 from sqlalchemy import text
 from app import db
+from datetime import datetime
 
 
 class SportslineQueries:
@@ -189,7 +190,7 @@ class SportslineQueries:
         return returns_by_market
 
     @staticmethod
-    def get_current_league_winning_cappers(league: str):
+    def get_current_league_winning_cappers(league: str, start_date: datetime):
         query = text("""
             WITH roi_calculation AS (
                 SELECT 
@@ -218,20 +219,21 @@ class SportslineQueries:
                 FROM 
                     sportsline
                 WHERE 
-                    date > '2024-07-01 00:00:00' 
+                    date > :start_date
                     and league = :league    
                 GROUP BY 
                     league, capper
             )
             SELECT *
             FROM roi_calculation
-            WHERE bet_count > 25 
+            WHERE bet_count > 1 
               AND roi > 0
-            ORDER BY roi DESC;
+            ORDER BY returns DESC, roi DESC;
         """)
 
         cappers = db.session.execute(query, {
-            'league': league
+            'league': league,
+            'start_date': start_date
         }).mappings().fetchall()
 
         return cappers
