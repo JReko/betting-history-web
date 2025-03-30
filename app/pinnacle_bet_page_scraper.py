@@ -102,6 +102,8 @@ class PinnacleBetPageScraper:
                 sport = f"{sport} - MLB"
             elif sport == "baseball" and "KOREA" in event_information_text.upper():
                 sport = f"{sport} - KBO"
+            elif sport == "baseball" and "NIPPON" in event_information_text.upper():
+                sport = f"{sport} - Japan NPB"
             # Football
             elif sport == "football" and "NFL" in event_information_text.upper():
                 sport = f"{sport} - NFL"
