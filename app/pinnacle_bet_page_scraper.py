@@ -88,6 +88,8 @@ class PinnacleBetPageScraper:
             # Hockey
             if sport == "hockey" and "NHL" in event_information_text.upper():
                 sport = f"{sport} - NHL"
+            elif sport == "hockey" and "QUEBEC MAJOR JUNIOR HOCKEY LEAGUE" in event_information_text.upper():
+                sport = f"{sport} - QMJHL"
             # Tennis
             elif sport == "tennis" and "ATP" in event_information_text.upper():
                 sport = f"{sport} - ATP"
