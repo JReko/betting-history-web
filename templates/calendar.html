@@ -122,4 +122,55 @@ h2 strong {
         {% endfor %}
     </div>
 </div>
+
+<div class="container mt-5">
+  <table class="table table-bordered table-sm table-hover">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Capper</th>
+        <th>Total Bets</th>
+        <th>Settled Bets</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Refunded</th>
+        <th>Profit</th>
+        <th>Total Stake</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in monthly_cappers %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>
+          <a href="/capper/{{ row.capper }}">{{ row.capper }}</a>
+        </td>
+        <td>{{ row.bets_count }}</td>
+        <td>{{ row.settled_bets }}</td>
+        <td>{{ row.wins }}</td>
+        <td>{{ row.losses }}</td>
+        <td>{{ row.refunded }}</td>
+        <td> 
+          {% if row.profit > 0 %}
+            <span class="text-success">+{{ "{:.2f}".format(row.profit) }}$</span>
+          {% elif row.profit < 0 %}
+            <span class="text-danger">{{ "{:.2f}".format(row.profit) }}$</span>
+          {% else %}
+            <span>{{ "{:.2f}".format(row.profit) }}$</span>
+          {% endif %}
+        </td>
+        <td>{{ "{:.2f}".format(row.total_stake) }}$</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" class="text-center text-muted">
+          No cappers with bets this month.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
 {% endblock %}

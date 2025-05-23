@@ -153,4 +153,38 @@ class CapperQueries:
         # Execute the raw SQL query
         return db.session.execute(query, {"account_id": current_user.get_id()}).fetchall()
 
+    @staticmethod
+    def get_monthly_cappers_summary(start_utc, end_utc):
+        """
+        For the given UTC window, return per-capper aggregate stats.
+        """
+        query = text("""
+            SELECT
+                capper,
+                COUNT(*)                                         AS bets_count,
+                SUM(CASE WHEN result IS NOT NULL THEN 1 ELSE 0 END)  AS settled_bets,
+                SUM(CASE WHEN result = 'Win'  THEN 1 ELSE 0 END)      AS wins,
+                SUM(CASE WHEN result = 'Loss' THEN 1 ELSE 0 END)      AS losses,
+                SUM(CASE WHEN result = 'Refunded' THEN 1 ELSE 0 END)  AS refunded,
+                SUM(CASE 
+                        WHEN result = 'Win'  THEN potential_win_amount
+                        WHEN result = 'Loss' THEN -stake_amount
+                        ELSE 0
+                    END)                                           AS profit,
+                SUM(CASE WHEN result != 'Refunded' THEN stake_amount ELSE 0 END)
+                                                                  AS total_stake
+            FROM bets
+            WHERE
+                account_id = :account_id
+                AND event_date >= :start_utc
+                AND event_date <= :end_utc
+                AND capper IS NOT NULL
+            GROUP BY capper
+            ORDER BY profit DESC
+        """)
+        return db.session.execute(query, {
+            "account_id": current_user.get_id(),
+            "start_utc": start_utc,
+            "end_utc": end_utc,
+        }).mappings().fetchall()
 

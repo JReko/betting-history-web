@@ -6,6 +6,7 @@ from flask_login import current_user
 
 from app.bet_model import Bet
 from app.utility_time_zone import UtilityTimeZone
+from app.capper_queries import CapperQueries
 
 calendar_bp = Blueprint('calendar', __name__)
 
@@ -34,7 +35,6 @@ def calendar_view(year, month):
         previous_year_int = year
 
     start_of_the_month_utc = UtilityTimeZone.get_day_start_datetime_utc(f"{year}-{month}-1")
-
     last_day_of_month = start_of_the_month_utc.replace(day=calendar.monthrange(year, month)[1])
     end_of_the_month_utc = UtilityTimeZone.get_day_end_datetime_utc(f"{last_day_of_month.year}-{last_day_of_month.month}-{last_day_of_month.day}")
 
@@ -65,6 +65,12 @@ def calendar_view(year, month):
             daily_profits[day] -= bet.stake_amount
             total_profits -= bet.stake_amount
 
+    # Monthly recap by capper
+    monthly_cappers = CapperQueries.get_monthly_cappers_summary(
+        start_utc=start_of_the_month_utc,
+        end_utc=end_of_the_month_utc
+    )
+
     # Pass the calendar module, daily profits, and selected month info to the template
     return render_template(
         'calendar.html',
@@ -78,6 +84,7 @@ def calendar_view(year, month):
         next_year_int=next_year_int,
         previous_month_int=previous_month_int,
         previous_year_int=previous_year_int,
+        monthly_cappers=monthly_cappers,
     )
 
 

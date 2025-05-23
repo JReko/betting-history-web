@@ -16,7 +16,8 @@ def scrape_page(offset: int, chunk: int, capper_id: int = 51219409) -> bool:
 
     # Connection string
     # DEV
-    conn = psycopg2.connect("postgresql://local_user:strong_password@localhost:5432/betting_history_web")
+    # conn = psycopg2.connect("postgresql://local_user:strong_password@localhost:5432/betting_history_web")
+    conn = psycopg2.connect("postgresql://umv6rl45h3vo4:pa3d9f780aad83a4be83090945bdd0b0d7d6a993814b2219388187daadb82b821@c8m0261h0c7idk.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d5t05b9j49d371")
 
     # Create a cursor to execute SQL queries
     cursor = conn.cursor()
